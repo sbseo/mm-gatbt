@@ -17,10 +17,10 @@ import torch.nn as nn
 import torch.optim as optim
 from pytorch_pretrained_bert import BertAdam
 
-from mmbt.data.helpers import get_data_loaders
-from mmbt.models import get_model
-from mmbt.utils.logger import create_logger
-from mmbt.utils.utils import *
+from data.helpers import get_data_loaders
+from models import get_model
+from utils.logger import create_logger
+from utils.utils import *
 
 
 def get_args(parser):

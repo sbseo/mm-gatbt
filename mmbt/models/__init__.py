@@ -7,12 +7,12 @@
 # LICENSE file in the root directory of this source tree.
 #
 
-from mmbt.models.bert import BertClf
-from mmbt.models.bow import GloveBowClf
-from mmbt.models.concat_bert import MultimodalConcatBertClf
-from mmbt.models.concat_bow import  MultimodalConcatBowClf
-from mmbt.models.image import ImageClf
-from mmbt.models.mmbt import MultimodalBertClf
+from models.bert import BertClf
+from models.bow import GloveBowClf
+from models.concat_bert import MultimodalConcatBertClf
+from models.concat_bow import  MultimodalConcatBowClf
+from models.image import ImageClf
+from models.mmbt import MultimodalBertClf
 
 
 MODELS = {

@@ -17,8 +17,8 @@ import torchvision.transforms as transforms
 from pytorch_pretrained_bert import BertTokenizer
 from torch.utils.data import DataLoader
 
-from mmbt.data.dataset import JsonlDataset
-from mmbt.data.vocab import Vocab
+from data.dataset import JsonlDataset
+from data.vocab import Vocab
 
 
 def get_transforms(args):

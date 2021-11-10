@@ -15,13 +15,14 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset
 
-from mmbt.utils.utils import truncate_seq_pair, numpy_seed
+from utils.utils import truncate_seq_pair, numpy_seed
 
 
 class JsonlDataset(Dataset):
     def __init__(self, data_path, tokenizer, transforms, vocab, args):
         self.data = [json.loads(l) for l in open(data_path)]
-        self.data_dir = os.path.dirname(data_path)
+        # self.data_dir = os.path.dirname(data_path)
+        self.data_dir = "../dataset"
         self.tokenizer = tokenizer
         self.args = args
         self.vocab = vocab
@@ -79,9 +80,9 @@ class JsonlDataset(Dataset):
 
         image = None
         if self.args.model in ["img", "concatbow", "concatbert", "mmbt"]:
-            if self.data[index]["img"]:
+            if self.data[index]["image"]:
                 image = Image.open(
-                    os.path.join(self.data_dir, self.data[index]["img"])
+                    os.path.join(self.data_dir, self.data[index]["image"])
                 ).convert("RGB")
             else:
                 image = Image.fromarray(128 * np.ones((256, 256, 3), dtype=np.uint8))
