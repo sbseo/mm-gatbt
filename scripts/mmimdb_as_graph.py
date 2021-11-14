@@ -1,9 +1,14 @@
+###
+# 1) mmimdb graph dataset should not be splited into train/test dataset
+# 2) all node numbers should start from 0. That is, remap all id numbers.
+### 
+
+
 from collections import defaultdict
 import sys
 import os
 import json
 import pandas as pd
-
 
 def format_mmimdb_add_staff(dataset_root_path):
     """return dictionary which includes movie info and staff.
@@ -77,16 +82,18 @@ def save_mmimdb_dataset_to_csv(dic, dataset_root_path):
     Returns:
         node_data.csv: id | feat | lbl
         edge_data.csv: src | dest
+        idx2node.csv: id | node#
     """
-    # for each dict, save it to 
-    # key: {id, label, nodes}
 
     dic_flatten = defaultdict()
     edges = list()
+    idx2node = {v:i for i, v in enumerate(dic.keys())}
     features = ["id", "text", "image", "label"]
+
     for idx, d in dic.items():
-        dic_flatten[idx] = [d[feat] for feat in features]
-        edges += [{"src": idx, "dst": dst} for dst in d["edges"]]
+        node_src = idx2node[idx]
+        dic_flatten[node_src] = [d[feat] for feat in features]
+        edges += [{"src": node_src, "dst": idx2node[dst]} for dst in d["edges"]]
 
     node_data = pd.DataFrame.from_dict(dic_flatten, orient='index')
     node_data.to_csv(os.path.join(dataset_root_path, "node_data.csv"), index=False, header=features)
@@ -94,14 +101,17 @@ def save_mmimdb_dataset_to_csv(dic, dataset_root_path):
     edge_data = pd.DataFrame.from_records(edges)
     edge_data.to_csv(os.path.join(dataset_root_path, "edge_data.csv"), index=False)
 
-    return dic_flatten, edges
+    idx2node_data = pd.DataFrame.from_dict(idx2node, orient='index')
+    idx2node_data.to_csv(os.path.join(dataset_root_path, "idx2node.csv"), index=True, index_label="idx", header=["node"])
+
+    return dic_flatten, edges, idx2node
 
 
 if __name__=="__main__":
-    # python3 scripts/add_connection.py ../dataset/mmimdb/
+    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/
     dobj = format_mmimdb_add_staff(sys.argv[1])
     dobj = format_mmimdb_add_edge(dobj)
-    dflatten, edges = save_mmimdb_dataset_to_csv(dobj, sys.argv[1])
-    print(dflatten["1277953"])
+    dflatten, edges, idx2node = save_mmimdb_dataset_to_csv(dobj, sys.argv[1])
+    print(dflatten[0])
 
 
