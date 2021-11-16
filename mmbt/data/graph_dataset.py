@@ -11,6 +11,7 @@ import argparse
 from collections import Counter
 import json
 
+
 class Vocab(object):
     def __init__(self, emptyInit=False):
         if emptyInit:
@@ -39,8 +40,6 @@ def get_glove_words(path):
         w, _ = line.split(" ", 1)
         word_list.append(w)
     return word_list
-
-
 
 def get_args(parser):
     parser.add_argument("--batch_sz", type=int, default=128)
@@ -193,6 +192,21 @@ def get_labels_and_frequencies(path):
 
     return list(label_freqs.keys()), label_freqs
 
+from dgl.nn import GraphConv
+import torch.nn.functional as F
+from gcn_train import train
+
+class GCN(nn.Module):
+    def __init__(self, in_feats, h_feats, num_classes):
+        super(GCN, self).__init__()
+        self.conv1 = GraphConv(in_feats, h_feats)
+        self.conv2 = GraphConv(h_feats, num_classes)
+
+    def forward(self, g, in_feat):
+        h = self.conv1(g, in_feat)
+        h = F.relu(h)
+        h = self.conv2(g, h)
+        return h
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Train Models")
@@ -214,6 +228,7 @@ if __name__=="__main__":
     graph = dataset[0]
     print(graph)
 
-
-
-
+    # Create the model with given dimensions
+    model = GCN(graph.ndata['feat'].shape[1], 32, args.n_classes)
+    graph = dgl.add_self_loop(graph)
+    train(graph, model)
