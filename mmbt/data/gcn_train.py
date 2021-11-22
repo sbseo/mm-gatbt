@@ -10,7 +10,7 @@ def CXE(predicted, target):
     return -(target * np.log(predicted)).sum(dim=1).mean()
 
 def train(g, model, args):
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001) # 0.00001 works good
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) # 0.00001 works good
     best_val_acc = 0
     best_test_acc = 0
 
