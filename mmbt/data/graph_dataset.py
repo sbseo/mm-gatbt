@@ -44,13 +44,13 @@ def get_glove_words(path):
 def get_args(parser):
     parser.add_argument("--batch_sz", type=int, default=128)
     parser.add_argument("--bert_model", type=str, default="bert-base-uncased", choices=["bert-base-uncased", "bert-large-uncased"])
-    parser.add_argument("--data_path", type=str, default="../dataset/")
+    parser.add_argument("--data_path", type=str, default="../../dataset/")
     parser.add_argument("--drop_img_percent", type=float, default=0.0)
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--embed_sz", type=int, default=300)
     parser.add_argument("--freeze_img", type=int, default=0)
     parser.add_argument("--freeze_txt", type=int, default=0)
-    parser.add_argument("--glove_path", type=str, default="../gloVe/glove.6B.300d.txt")
+    parser.add_argument("--glove_path", type=str, default="../../gloVe/glove.6B.300d.txt")
     parser.add_argument("--gradient_accumulation_steps", type=int, default=24)
     parser.add_argument("--hidden", nargs="*", type=int, default=[])
     parser.add_argument("--hidden_sz", type=int, default=768)
@@ -99,7 +99,6 @@ class GloveBowEncoder(nn.Module):
         return self.embed(x).sum(1)
 
 
-
 class MovieDataset(DGLDataset):
     def __init__(self, args):
         self.args = args
@@ -119,8 +118,8 @@ class MovieDataset(DGLDataset):
     def process(self):
         # nodes_data = pd.read_csv('../members.csv')
         # edges_data = pd.read_csv('../interactions.csv')
-        nodes_data = pd.read_csv('../dataset/mmimdb/node_data.csv')
-        edges_data = pd.read_csv('../dataset/mmimdb/edge_data.csv')
+        nodes_data = pd.read_csv('../../dataset/mmimdb/node_data.csv')
+        edges_data = pd.read_csv('../../dataset/mmimdb/edge_data.csv')
 
         # TO DO: 
         # 1) update feature representation. let's use glove
@@ -163,16 +162,16 @@ class MovieDataset(DGLDataset):
         # If your dataset is a node classification dataset, you will need to assign
         # masks indicating whether a node belongs to training, validation, and test set.
         n_nodes = nodes_data.shape[0]
-        n_train = int(n_nodes * 0.6)
-        n_val = int(n_nodes * 0.2)
+        n_train = int(n_nodes * 0.8)
+        n_val = int(n_nodes * 0)
         train_mask = torch.zeros(n_nodes, dtype=torch.bool)
-        val_mask = torch.zeros(n_nodes, dtype=torch.bool)
+        # val_mask = torch.zeros(n_nodes, dtype=torch.bool)
         test_mask = torch.zeros(n_nodes, dtype=torch.bool)
         train_mask[:n_train] = True
-        val_mask[n_train:n_train + n_val] = True
+        # val_mask[n_train:n_train + n_val] = True
         test_mask[n_train + n_val:] = True
         self.graph.ndata['train_mask'] = train_mask
-        self.graph.ndata['val_mask'] = val_mask
+        # self.graph.ndata['val_mask'] = val_mask
         self.graph.ndata['test_mask'] = test_mask
 
     def __getitem__(self, i):
@@ -220,7 +219,7 @@ if __name__=="__main__":
     args.vocab_sz = vocab.vocab_sz
 
     args.labels, args.label_freqs = get_labels_and_frequencies(
-        os.path.join(args.data_path, args.task, "dev.jsonl")
+        os.path.join(args.data_path, args.task, "train.jsonl")
     )
     args.n_classes = len(args.labels)
 
@@ -229,6 +228,6 @@ if __name__=="__main__":
     print(graph)
 
     # Create the model with given dimensions
-    model = GCN(graph.ndata['feat'].shape[1], 32, args.n_classes)
+    model = GCN(graph.ndata['feat'].shape[1], 200, args.n_classes)
     graph = dgl.add_self_loop(graph)
-    train(graph, model)
+    train(graph, model, args)
