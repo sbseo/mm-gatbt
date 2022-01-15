@@ -9,6 +9,7 @@
 
 import torch.nn as nn
 from pytorch_pretrained_bert.modeling import BertModel
+# from transformers import BertModel
 
 
 class BertEncoder(nn.Module):

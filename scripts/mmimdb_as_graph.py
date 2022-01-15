@@ -10,7 +10,7 @@ import os
 import json
 import pandas as pd
 
-def format_mmimdb_add_staff(dataset_root_path):
+def format_mmimdb_add_staff(dataset_root_path, file_name, save_name):
     """return dictionary which includes movie info and staff.
     
     Requirement:
@@ -23,9 +23,21 @@ def format_mmimdb_add_staff(dataset_root_path):
         dobj: dictinary object where key is movie id and value is dictionary
     """
 
-    features = ['director', 'producer', 'writer', 'cinematographer', 'art director']
+    if save_name == "sparse":
+        features = ['director', 'producer', 'writer']
+    elif save_name == "medium":
+        features = ['director', 'producer', 'writer', 'cinematographer', 'art director']
+    elif save_name == 'dense':
+        features = ['director', 'producer', 'writer', 'cinematographer', 'art director', 'assistant director', 'editor']
+    elif save_name == 'writer':
+        features = ['writer']
+    elif save_name == 'producer':
+        features = ['producer']
+    elif save_name == 'director':
+        features = ['director']
+    
     dobj = defaultdict()
-    f = open(os.path.join(dataset_root_path, "dev.jsonl"), 'r')
+    f = open(os.path.join(dataset_root_path, file_name), 'r')
     files = os.listdir(os.path.join(dataset_root_path, "dataset"))
 
     for sen in f:
@@ -73,7 +85,7 @@ def format_mmimdb_add_edge(dic):
 
     return dic
 
-def save_mmimdb_dataset_to_csv(dic, dataset_root_path):
+def save_mmimdb_dataset_to_csv(dic, dataset_root_path, save_name):
     """Save to csv
 
     Args:
@@ -96,22 +108,24 @@ def save_mmimdb_dataset_to_csv(dic, dataset_root_path):
         edges += [{"src": node_src, "dst": idx2node[dst]} for dst in d["edges"]]
 
     node_data = pd.DataFrame.from_dict(dic_flatten, orient='index')
-    node_data.to_csv(os.path.join(dataset_root_path, "node_data.csv"), index=False, header=features)
+    node_data.to_csv(os.path.join(dataset_root_path, save_name + "_node_data.csv"), index=False, header=features)
 
     edge_data = pd.DataFrame.from_records(edges)
-    edge_data.to_csv(os.path.join(dataset_root_path, "edge_data.csv"), index=False)
+    edge_data.to_csv(os.path.join(dataset_root_path, save_name + "_edge_data.csv"), index=False)
 
     idx2node_data = pd.DataFrame.from_dict(idx2node, orient='index')
-    idx2node_data.to_csv(os.path.join(dataset_root_path, "idx2node.csv"), index=True, index_label="idx", header=["node"])
+    idx2node_data.to_csv(os.path.join(dataset_root_path, save_name + "_idx2node.csv"), index=True, index_label="idx", header=["node"])
 
     return dic_flatten, edges, idx2node
 
 
 if __name__=="__main__":
-    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/
-    dobj = format_mmimdb_add_staff(sys.argv[1])
+    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl
+    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl sparse
+    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl dense
+    save_name = sys.argv[3]
+    dobj = format_mmimdb_add_staff(sys.argv[1], sys.argv[2], save_name)
     dobj = format_mmimdb_add_edge(dobj)
-    dflatten, edges, idx2node = save_mmimdb_dataset_to_csv(dobj, sys.argv[1])
+
+    dflatten, edges, idx2node = save_mmimdb_dataset_to_csv(dobj, sys.argv[1], save_name)
     print(dflatten[0])
-
-

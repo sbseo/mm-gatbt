@@ -25,7 +25,7 @@ from utils.utils import *
 
 def get_args(parser):
     parser.add_argument("--batch_sz", type=int, default=128)
-    parser.add_argument("--bert_model", type=str, default="bert-base-uncased", choices=["bert-base-uncased", "bert-large-uncased"])
+    parser.add_argument("--bert_model", type=str, default="bert-base-uncased", choices=["prajjwal1/bert-tiny", "bert-base-uncased", "bert-large-uncased"])
     parser.add_argument("--data_path", type=str, default="/path/to/data_dir/")
     parser.add_argument("--drop_img_percent", type=float, default=0.0)
     parser.add_argument("--dropout", type=float, default=0.1)
@@ -44,7 +44,7 @@ def get_args(parser):
     parser.add_argument("--lr_patience", type=int, default=2)
     parser.add_argument("--max_epochs", type=int, default=100)
     parser.add_argument("--max_seq_len", type=int, default=512)
-    parser.add_argument("--model", type=str, default="bow", choices=["bow", "img", "bert", "concatbow", "concatbert", "mmbt"])
+    parser.add_argument("--model", type=str, default="bow", choices=["bow", "img", "bert", "concatbow", "concatbert", "mmbt", "gcn_bert"])
     parser.add_argument("--n_workers", type=int, default=12)
     parser.add_argument("--name", type=str, default="nameless")
     parser.add_argument("--num_image_embeds", type=int, default=1)
@@ -55,6 +55,12 @@ def get_args(parser):
     parser.add_argument("--task_type", type=str, default="multilabel", choices=["multilabel", "classification"])
     parser.add_argument("--warmup", type=float, default=0.1)
     parser.add_argument("--weight_classes", type=int, default=1)
+    parser.add_argument("--graph_path", type=str, default="../dataset/mmimdb/")
+    parser.add_argument("--txt_enc", type=str, default="glove", choices=["glove", "bert", "none"])
+    parser.add_argument("--img_enc", type=str, default="res", choices=["res", "eff", "eff6", "none"])
+    parser.add_argument("--gnn_load", type=str, default="./mmbt/res_gcn.pth")
+    parser.add_argument("--img_infeat", type=int, default=1000)
+
 
 
 def get_criterion(args):
@@ -72,7 +78,7 @@ def get_criterion(args):
 
 
 def get_optimizer(model, args):
-    if args.model in ["bert", "concatbert", "mmbt"]:
+    if args.model in ["bert", "concatbert", "mmbt", "gcn_bert"]:
         total_steps = (
             args.train_data_len
             / args.batch_sz
@@ -138,7 +144,6 @@ def model_eval(i_epoch, data, model, args, criterion, store_preds=False):
 
 def model_forward(i_epoch, model, args, criterion, batch):
     txt, segment, mask, img, tgt = batch
-
     freeze_img = i_epoch < args.freeze_img
     freeze_txt = i_epoch < args.freeze_txt
 
@@ -158,6 +163,12 @@ def model_forward(i_epoch, model, args, criterion, batch):
         txt, img = txt.cuda(), img.cuda()
         mask, segment = mask.cuda(), segment.cuda()
         out = model(txt, mask, segment, img)
+    elif args.model ==  'gcn_bert':
+        txt, mask, segment = txt.cuda(), mask.cuda(), segment.cuda()
+        out = model(txt, mask, segment, img)
+        for param in model.txtenc.parameters():
+            param.requires_grad = not freeze_txt
+
     else:
         assert args.model == "mmbt"
         for param in model.enc.img_encoder.parameters():
@@ -223,7 +234,8 @@ def train(args):
                 optimizer.zero_grad()
 
         model.eval()
-        metrics = model_eval(i_epoch, val_loader, model, args, criterion)
+        # metrics = model_eval(i_epoch, val_loader, model, args, criterion)
+        metrics = model_eval(i_epoch, test_loaders["test"], model, args, criterion)
         logger.info("Train Loss: {:.4f}".format(np.mean(train_losses)))
         log_metrics("Val", metrics, args, logger)
 
@@ -262,6 +274,7 @@ def train(args):
             np.inf, test_loader, model, args, criterion, store_preds=True
         )
         log_metrics(f"Test - {test_name}", test_metrics, args, logger)
+        break # don't run test_hard
 
 
 def cli_main():

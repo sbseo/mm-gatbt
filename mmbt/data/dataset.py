@@ -95,4 +95,8 @@ class JsonlDataset(Dataset):
             # The first segment (0) is of images.
             segment += 1
 
+        if self.args.model == "gcn_bert":
+            image = torch.tensor(int(self.data[index]["id"]))
+            assert self.data[index]["id"] != None
+
         return sentence, segment, image, label

@@ -13,6 +13,7 @@ from models.concat_bert import MultimodalConcatBertClf
 from models.concat_bow import  MultimodalConcatBowClf
 from models.image import ImageClf
 from models.mmbt import MultimodalBertClf
+from models.concat_gcn_bert import MultimodalConcatGCNBertClf
 
 
 MODELS = {
@@ -22,6 +23,7 @@ MODELS = {
     "concatbert": MultimodalConcatBertClf,
     "img": ImageClf,
     "mmbt": MultimodalBertClf,
+    "gcn_bert": MultimodalConcatGCNBertClf,
 }
 
 

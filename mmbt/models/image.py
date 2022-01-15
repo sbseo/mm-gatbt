@@ -16,7 +16,7 @@ class ImageEncoder(nn.Module):
     def __init__(self, args):
         super(ImageEncoder, self).__init__()
         self.args = args
-        model = torchvision.models.resnet152(pretrained=True)
+        model = torchvision.models.mobilenet_v3_small(pretrained=True)
         modules = list(model.children())[:-2]
         self.model = nn.Sequential(*modules)
 
