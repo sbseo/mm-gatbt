@@ -12,7 +12,7 @@ from torch.functional import Tensor
 def CXE(predicted, target):
     return -(target * np.log(predicted)).sum(dim=1).mean()
 
-def train(g, model, args):
+def train(g, model, args, logger):
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr) # 0.00001 works good
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, "max", patience=args.lr_patience, verbose=True, factor=args.lr_factor
@@ -111,3 +111,6 @@ def train(g, model, args):
         if e % 100 == 0:
             print('In epoch {}, loss: {:.3f}, train acc: {:.3f}, test micro: {:.3f}, test macro: {:.3f}, (best {:.3f}, {:.3f})'.format(
                 e, loss, train_acc, test_acc, test_acc_macro, best_test_acc, best_test_acc_macro))
+            if args.save_model:
+                logger.write('In epoch {}, loss: {:.3f}, train acc: {:.3f}, test micro: {:.3f}, test macro: {:.3f}, (best {:.3f}, {:.3f})'.format(
+                e, loss, train_acc, test_acc, test_acc_macro, best_test_acc, best_test_acc_macro) + "\n")

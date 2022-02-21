@@ -26,9 +26,10 @@ class ImageDataset(object):
 
     def __getitem__(self, idx):
 
-        img_path = self.nodes_data['image'][idx]
+        im_path = self.nodes_data['image'][idx]
+        im_name = im_path.split("/")[-1]
         img = Image.open(
-            os.path.join(self.args.data_path, img_path)
+            os.path.join(self.args.imdir_path, im_name)
         ).convert("RGB")
         img = self.transform(img)
         # img = torchvision.transforms.ToTensor()(img)

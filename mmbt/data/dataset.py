@@ -27,7 +27,10 @@ class JsonlDataset(Dataset):
         self.args = args
         self.vocab = vocab
         self.n_classes = len(args.labels)
-        self.text_start_token = ["[CLS]"] if args.model != "mmbt" else ["[SEP]"]
+        if args.model in ["mmbt", "mmsagebt", "mmsagebt2","mmgatbt","mmgatbt2"]:
+            self.text_start_token = ["[SEP]"]
+        else:
+            self.text_start_token = ["[CLS]"]  
 
         with numpy_seed(0):
             for row in self.data:
@@ -35,7 +38,7 @@ class JsonlDataset(Dataset):
                     row["img"] = None
 
         self.max_seq_len = args.max_seq_len
-        if args.model == "mmbt":
+        if args.model in ["mmbt", "mmsagebt", "mmsagebt2","mmgatbt","mmgatbt2"]:
             self.max_seq_len -= args.num_image_embeds
 
         self.transforms = transforms
@@ -79,7 +82,7 @@ class JsonlDataset(Dataset):
             )
 
         image = None
-        if self.args.model in ["img", "concatbow", "concatbert", "mmbt"]:
+        if self.args.model in ["img", "concatbow", "concatbert", "mmbt", "mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
             if self.data[index]["image"]:
                 image = Image.open(
                     os.path.join(self.data_dir, self.data[index]["image"])
@@ -94,6 +97,15 @@ class JsonlDataset(Dataset):
             sentence = sentence[1:]
             # The first segment (0) is of images.
             segment += 1
+
+        if self.args.model in ["mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+            # The first SEP is part of Image Token.
+            segment = segment[1:]
+            sentence = sentence[1:]
+            # The first segment (0) is of images.
+            segment += 1
+            nid = torch.tensor(int(self.data[index]["id"]))
+            return sentence, segment, image, label, nid
 
         if self.args.model == "gcn_bert":
             image = torch.tensor(int(self.data[index]["id"]))

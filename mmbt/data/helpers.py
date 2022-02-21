@@ -57,7 +57,7 @@ def get_glove_words(path):
 
 def get_vocab(args):
     vocab = Vocab()
-    if args.model in ["bert", "mmbt", "concatbert", "gcn_bert"]:
+    if args.model in ["bert", "mmbt", "concatbert", "gcn_bert", "mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
         bert_tokenizer = BertTokenizer.from_pretrained(
             args.bert_model, do_lower_case=True
         )
@@ -81,7 +81,7 @@ def collate_fn(batch, args):
     segment_tensor = torch.zeros(bsz, max_seq_len).long()
 
     img_tensor = None
-    if args.model in ["img", "concatbow", "concatbert", "mmbt", "gcn_bert"]:
+    if args.model in ["img", "concatbow", "concatbert", "mmbt", "gcn_bert", "mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
         img_tensor = torch.stack([row[2] for row in batch])
 
     if args.task_type == "multilabel":
@@ -97,13 +97,17 @@ def collate_fn(batch, args):
         segment_tensor[i_batch, :length] = segment
         mask_tensor[i_batch, :length] = 1
 
+    if args.model in ["mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+        nid_tensor = torch.stack([row[4] for row in batch])
+        return text_tensor, segment_tensor, mask_tensor, img_tensor, tgt_tensor, nid_tensor
+
     return text_tensor, segment_tensor, mask_tensor, img_tensor, tgt_tensor
 
 
 def get_data_loaders(args):
     tokenizer = (
         BertTokenizer.from_pretrained(args.bert_model, do_lower_case=True).tokenize
-        if args.model in ["bert", "mmbt", "concatbert", "gcn_bert"]
+        if args.model in ["bert", "mmbt", "concatbert", "gcn_bert", "mmsagebt", "mmsagebt2", "visualbert","mmgatbt","mmgatbt2"]
         else str.split
     )
 

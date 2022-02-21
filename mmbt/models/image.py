@@ -16,7 +16,17 @@ class ImageEncoder(nn.Module):
     def __init__(self, args):
         super(ImageEncoder, self).__init__()
         self.args = args
-        model = torchvision.models.mobilenet_v3_small(pretrained=True)
+
+        # this is typo. res should be changed to mobile.
+        if self.args.img_enc == 'res':
+            model = torchvision.models.mobilenet_v3_small(pretrained=True)
+        elif self.args.img_enc == 'eff':
+            model = torchvision.models.efficientnet_b4(pretrained=True)
+        elif self.args.img_enc == 'eff6':
+            model = torchvision.models.efficientnet_b6(pretrained=True)
+        elif self.args.img_enc == 'resnet152':
+            model = torchvision.models.resnet152(pretrained=True)
+
         modules = list(model.children())[:-2]
         self.model = nn.Sequential(*modules)
 

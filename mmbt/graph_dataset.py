@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from transformers import BertTokenizer
 
 from data.graph_datasets import MovieDataset
+from data.graph_datasets import MovieDataset_dev
 from data.helpers import get_glove_words, get_labels_and_frequencies
 from data.vocab import Vocab
 from gcn_train import train
@@ -18,16 +19,17 @@ from models.graphsage import GraphSAGE
 def get_args(parser):
     parser.add_argument("--batch_sz", type=int, default=128)
     parser.add_argument("--txt_enc", type=str, default="glove", choices=["glove", "bert"])
-    parser.add_argument("--img_enc", type=str, default="none", choices=["res", "eff", "eff6", "none"])
+    parser.add_argument("--img_enc", type=str, default="none", choices=["res", "eff", "eff6", "resnet152", "none"])
     parser.add_argument("--bert_model", type=str, default="bert-base-uncased", choices=["prajjwal1/bert-tiny","bert-base-uncased", "bert-large-uncased"])
-    parser.add_argument("--data_path", type=str, default="../../dataset/")
-    parser.add_argument("--graph_path", type=str, default="../../dataset/mmimdb/")
+    parser.add_argument("--data_path", type=str, default="../dataset/")
+    parser.add_argument("--imdir_path", type=str, default="../dataset/mmimdb/dataset")
+    parser.add_argument("--graph_path", type=str, default="../dataset/mmimdb/")
     parser.add_argument("--drop_img_percent", type=float, default=0.0)
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--embed_sz", type=int, default=300)
     parser.add_argument("--freeze_img", type=int, default=0)
     parser.add_argument("--freeze_txt", type=int, default=0)
-    parser.add_argument("--glove_path", type=str, default="../../gloVe/glove.6B.300d.txt")
+    parser.add_argument("--glove_path", type=str, default="../gloVe/glove.6B.300d.txt")
     parser.add_argument("--gradient_accumulation_steps", type=int, default=24)
     parser.add_argument("--hidden", nargs="*", type=int, default=[])
     parser.add_argument("--hidden_sz", type=int, default=200)
@@ -61,10 +63,25 @@ def get_args(parser):
     parser.add_argument("--gat_slope", type=float, default="0.1")                    
     parser.add_argument("--save_model", type=bool, default=False)                    
 
+    # GAT
+    parser.add_argument("--num_heads", type=int, default=8)                    
+    parser.add_argument("--num_hidden", type=int, default=16)                    
+    parser.add_argument("--num_layers", type=int, default=3)           
+    parser.add_argument("--num_output_heads", type=int, default=3)
+
+    # weight
+    parser.add_argument("--weight", type=int, default=0)
+
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Train Models")
     get_args(parser)
     args, remaining_args = parser.parse_known_args()
+    assert remaining_args == [], remaining_args
+    
+    if args.save_model:
+        logger = open(os.path.join(f"{args.name}.txt"), "a+")
+        logger.write(f"{args} \n")
+    print(args)
     
     vocab = Vocab()
     if args.txt_enc == "glove":
@@ -87,8 +104,11 @@ if __name__=="__main__":
     args.n_classes = len(args.labels)
     dataset = MovieDataset(args)
     graph = dataset[0].to('cuda')
-    print(args)
+    if args.save_model:
+        logger.write(f"{graph} \n")
     print(graph)
+
+
 
     # Create the model with given dimensions
     if args.model == "gcn":
@@ -100,15 +120,16 @@ if __name__=="__main__":
         model = GraphSAGE(graph.ndata['feat'].shape[1], args.hidden_sz, args.n_classes, 1, F.relu, args.dropout, args.aggregator).to('cuda')
 
     elif args.model == "gat":
-        num_heads = 8
-        num_layers = 1
-        num_output_heads = 1
+        # hidden_sz = num_heads x num_h
+        num_heads = args.num_heads 
+        num_layers = args.num_layers 
+        num_output_heads = args.num_output_heads 
         heads = torch.as_tensor(([num_heads] * num_layers) + [num_output_heads], dtype=torch.int32)
         graph = dgl.add_self_loop(graph)
         model = GAT(g=graph, 
                     num_layers=num_layers,
                     in_dim=graph.ndata['feat'].shape[1],
-                    num_hidden=10,
+                    num_hidden=args.num_hidden, #default 10
                     num_classes=args.n_classes,
                     heads=heads,
                     activation=F.elu,
@@ -117,6 +138,10 @@ if __name__=="__main__":
                     negative_slope=args.gat_slope,
                     residual=True
                     ).to('cuda')
+    if args.save_model:
+        logger.write(f"{model} \n")
     print(model)
 
-    train(graph, model, args)
+    train(graph, model, args, logger)
+    if args.save_model:
+        logger.close()    

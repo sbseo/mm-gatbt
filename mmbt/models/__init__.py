@@ -14,7 +14,11 @@ from models.concat_bow import  MultimodalConcatBowClf
 from models.image import ImageClf
 from models.mmbt import MultimodalBertClf
 from models.concat_gcn_bert import MultimodalConcatGCNBertClf
-
+from models.mmsagebt import MultimodalSageBertClf
+from models.mmsagebt2 import MultimodalSageBert2Clf
+from models.visualbert import VisualBertClf
+from models.mmgatbt import MultimodalGATBertClf
+from models.mmgatbt2 import MultimodalGAT2BertClf
 
 MODELS = {
     "bert": BertClf,
@@ -23,9 +27,13 @@ MODELS = {
     "concatbert": MultimodalConcatBertClf,
     "img": ImageClf,
     "mmbt": MultimodalBertClf,
+    "mmsagebt": MultimodalSageBertClf,
+    "mmsagebt2": MultimodalSageBert2Clf,
+    "mmgatbt": MultimodalGATBertClf,
+    "mmgatbt2": MultimodalGAT2BertClf,
     "gcn_bert": MultimodalConcatGCNBertClf,
+    "visualbert": VisualBertClf,
 }
-
 
 def get_model(args):
     return MODELS[args.model](args)

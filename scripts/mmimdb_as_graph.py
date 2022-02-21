@@ -25,7 +25,7 @@ def format_mmimdb_add_staff(dataset_root_path, file_name, save_name):
 
     if save_name == "sparse":
         features = ['director', 'producer', 'writer']
-    elif save_name == "medium":
+    elif save_name in ["medium", "medium_weight"]:
         features = ['director', 'producer', 'writer', 'cinematographer', 'art director']
     elif save_name == 'dense':
         features = ['director', 'producer', 'writer', 'cinematographer', 'art director', 'assistant director', 'editor']
@@ -75,12 +75,14 @@ def format_mmimdb_add_edge(dic):
     for idx, d in dic.items():
         staff = set(d["staff"])
         connected = list()
+        weight = 0
         for idx2, d2 in dic.items():
             if idx == idx2:
                 continue
             if set.intersection(staff, set(d2["staff"])):
                 connected.append(idx2)
-        edges = {"edges":connected}
+                weight = len(set.intersection(staff, set(d2["staff"])))
+        edges = {"edges":[connected, weight]}
         dic[idx].update(edges)
 
     return dic
@@ -105,7 +107,9 @@ def save_mmimdb_dataset_to_csv(dic, dataset_root_path, save_name):
     for idx, d in dic.items():
         node_src = idx2node[idx]
         dic_flatten[node_src] = [d[feat] for feat in features]
-        edges += [{"src": node_src, "dst": idx2node[dst]} for dst in d["edges"]]
+        # d["edges"]: [['0303970', '0098691', '2495118', '0845464', '0251433'], 1]
+        # edges += [{"src": node_src, "dst": idx2node[dst[0]], 'weight': d["edges"][1]} for dst in d["edges"]] 
+        edges += [{"src": node_src, "dst": idx2node[dst], 'weight': d["edges"][1]} for dst in d["edges"][0]] 
 
     node_data = pd.DataFrame.from_dict(dic_flatten, orient='index')
     node_data.to_csv(os.path.join(dataset_root_path, save_name + "_node_data.csv"), index=False, header=features)
@@ -123,6 +127,7 @@ if __name__=="__main__":
     # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl
     # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl sparse
     # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl dense
+    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl medium_weight
     save_name = sys.argv[3]
     dobj = format_mmimdb_add_staff(sys.argv[1], sys.argv[2], save_name)
     dobj = format_mmimdb_add_edge(dobj)
