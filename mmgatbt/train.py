@@ -59,7 +59,7 @@ def get_args(parser):
     parser.add_argument("--weight_classes", type=int, default=1)
     parser.add_argument("--graph_path", type=str, default="../dataset/mmimdb/")
     parser.add_argument("--txt_enc", type=str, default="glove", choices=["glove", "bert", "none"])
-    parser.add_argument("--img_enc", type=str, default="res", choices=["res", "eff", "eff6", "resnet152", "none"])
+    parser.add_argument("--img_enc", type=str, default="res", choices=["mobile", "eff", "eff6", "resnet152", "none"])
     parser.add_argument("--gnn_load", type=str, default="./mmbt/res_gcn.pth")
     parser.add_argument("--img_infeat", type=int, default=1000)
     parser.add_argument("--g_hidden_sz", type=int, default=200)

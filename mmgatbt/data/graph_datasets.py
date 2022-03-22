@@ -8,12 +8,10 @@ import torchvision
 import torchvision.transforms as transforms
 from dgl.data import DGLDataset
 from PIL import Image
-# from pytorch_pretrained_bert import BertTokenizer
 from pytorch_pretrained_bert.modeling import BertModel
 from torch.utils.data import DataLoader, TensorDataset
 from torch.utils.data.sampler import SequentialSampler
 from tqdm import tqdm
-# from transformers import BertTokenizer, BertModel
 from transformers import BertTokenizer
 
 from data.img_dataset import ImageDataset
@@ -116,7 +114,7 @@ class MovieDataset(DGLDataset):
         )
         if self.args.img_enc != 'none':
             # this is typo. res should be changed to mobile.
-            if self.args.img_enc == 'res':
+            if self.args.img_enc == 'mobile':
                 model = torchvision.models. mobilenet_v3_small(pretrained=True)
             elif self.args.img_enc == 'eff':
                 model = torchvision.models.efficientnet_b4(pretrained=True)

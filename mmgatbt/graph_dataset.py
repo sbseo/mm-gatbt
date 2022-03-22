@@ -20,7 +20,7 @@ from models.graphsage import GraphSAGE
 def get_args(parser):
     parser.add_argument("--batch_sz", type=int, default=128)
     parser.add_argument("--txt_enc", type=str, default="glove", choices=["glove", "bert"])
-    parser.add_argument("--img_enc", type=str, default="none", choices=["res", "eff", "eff6", "resnet152", "none"])
+    parser.add_argument("--img_enc", type=str, default="none", choices=["mobile", "eff", "eff6", "resnet152", "none"])
     parser.add_argument("--bert_model", type=str, default="bert-base-uncased", choices=["prajjwal1/bert-tiny","bert-base-uncased", "bert-large-uncased"])
     parser.add_argument("--data_path", type=str, default="../dataset/")
     parser.add_argument("--imdir_path", type=str, default="../dataset/mmimdb/dataset")
