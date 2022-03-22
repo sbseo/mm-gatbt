@@ -95,10 +95,6 @@ class MultimodalGATBertEncoder(nn.Module):
             .fill_(0)
             .cuda()
         )
-        # img = self.img_encoder(input_img)  # BxNx3x224x224 -> BxNx2048
-        # img_embed_out = self.img_embeddings(img, img_tok)
-        # txt_embed_out = self.txt_embeddings(input_txt, segment)
-        # encoder_input = torch.cat([img_embed_out, txt_embed_out], 1)  # Bx(TEXT+IMG)xHID
 
         # [8,200] -> [8, 3, 576]
         gembed = self.genc(nid).cuda()
@@ -113,9 +109,9 @@ class MultimodalGATBertEncoder(nn.Module):
         gembed = torch.stack(glist)
         gembed = gembed.permute(1,0,2)
 
-        img_embed_out = self.img_embeddings(gembed, img_tok)
+        node_embed_out = self.img_embeddings(gembed, img_tok)
         txt_embed_out = self.txt_embeddings(input_txt, segment)
-        encoder_input = torch.cat([img_embed_out, txt_embed_out], 1)  # Bx(TEXT+IMG)xHID
+        encoder_input = torch.cat([node_embed_out, txt_embed_out], 1)  # Bx(TEXT+IMG)xHID
         
         encoded_layers = self.encoder(
             encoder_input, extended_attention_mask, output_all_encoded_layers=False
@@ -123,19 +119,15 @@ class MultimodalGATBertEncoder(nn.Module):
 
         return self.pooler(encoded_layers[-1])
 
-
 class MultimodalGATBertClf(nn.Module):
     def __init__(self, args):
         super(MultimodalGATBertClf, self).__init__()
         self.args = args
         self.enc = MultimodalGATBertEncoder(args)
-        # g_hidden_sz = 200
-        # args.img_hidden_sz = g_hidden_sz
-        # self.genc = SageEncoder(args)
-        last_size = args.hidden_sz #+ g_hidden_sz
+        last_size = args.hidden_sz
         self.clf = nn.Linear(last_size, args.n_classes)
 
     def forward(self, txt, mask, segment, img, nid):
-        mmbt = self.enc(txt, mask, segment, img, nid)
+        mmgatbt = self.enc(txt, mask, segment, img, nid)
 
-        return self.clf(mmbt)
+        return self.clf(mmgatbt)
