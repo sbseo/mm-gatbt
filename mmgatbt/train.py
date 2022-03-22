@@ -45,7 +45,7 @@ def get_args(parser):
     parser.add_argument("--lr_patience", type=int, default=2)
     parser.add_argument("--max_epochs", type=int, default=100)
     parser.add_argument("--max_seq_len", type=int, default=512)
-    parser.add_argument("--model", type=str, default="bow", choices=["bow", "img", "bert", "concatbow", "concatbert", "mmbt", "gcn_bert", "mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"])
+    parser.add_argument("--model", type=str, default="bow", choices=["bow", "img", "bert", "concatbow", "concatbert", "mmbt", "gcn_bert", "mmsagebt", "mmsagebt2","mmgatbt"])
     parser.add_argument("--pos", type=int, default=0)
     parser.add_argument("--n_workers", type=int, default=12)
     parser.add_argument("--name", type=str, default="nameless")
@@ -92,7 +92,7 @@ def get_criterion(args):
 
 
 def get_optimizer(model, args):
-    if args.model in ["bert", "concatbert", "mmbt", "gcn_bert", "mmsagebt","mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+    if args.model in ["bert", "concatbert", "mmbt", "gcn_bert", "mmsagebt","mmsagebt2","mmgatbt"]:
         total_steps = (
             args.train_data_len
             / args.batch_sz
@@ -157,7 +157,7 @@ def model_eval(i_epoch, data, model, args, criterion, store_preds=False):
 
 
 def model_forward(i_epoch, model, args, criterion, batch):
-    if args.model in ["mmsagebt","mmsagebt2", "visualbert","mmgatbt","mmgatbt2"]:
+    if args.model in ["mmsagebt","mmsagebt2", "mmgatbt"]:
         txt, segment, mask, img, tgt, nid = batch    
     else:
         txt, segment, mask, img, tgt = batch
@@ -187,16 +187,7 @@ def model_forward(i_epoch, model, args, criterion, batch):
         for param in model.txtenc.parameters():
             param.requires_grad = not freeze_txt
     
-    elif args.model in ['mmsagebt', "mmsagebt2","mmgatbt","mmgatbt2"]:
-        for param in model.enc.img_encoder.parameters():
-            param.requires_grad = not freeze_img
-        for param in model.enc.encoder.parameters():
-            param.requires_grad = not freeze_txt
-
-        txt, img = txt.cuda(), img.cuda()
-        mask, segment = mask.cuda(), segment.cuda()
-        out = model(txt, mask, segment, img, nid)
-    elif args.model ==  'visualbert':
+    elif args.model in ['mmsagebt', "mmsagebt2","mmgatbt"]:
         for param in model.enc.img_encoder.parameters():
             param.requires_grad = not freeze_img
         for param in model.enc.encoder.parameters():

@@ -81,7 +81,7 @@ class JsonlDataset(Dataset):
             )
 
         image = None
-        if self.args.model in ["img", "concatbow", "concatbert", "mmbt", "mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+        if self.args.model in ["img", "concatbow", "concatbert", "mmbt", "mmsagebt", "mmsagebt2","mmgatbt"]:
             if self.data[index]["image"]:
                 image = Image.open(
                     os.path.join(self.data_path, self.data[index]["image"])
@@ -97,7 +97,7 @@ class JsonlDataset(Dataset):
             # The first segment (0) is of images.
             segment += 1
 
-        if self.args.model in ["mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+        if self.args.model in ["mmsagebt", "mmsagebt2","mmgatbt"]:
             # The first SEP is part of Image Token.
             segment = segment[1:]
             sentence = sentence[1:]
