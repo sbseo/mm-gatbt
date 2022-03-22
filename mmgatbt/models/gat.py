@@ -15,9 +15,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from data.graph_datasets import MovieDataset
-from data.graph_datasets import MovieDataset_dev
 from dgl.nn import GATConv
-# from dgl.nn.pytorch.conv import GATv2Conv
 
 class GAT(nn.Module):
     def __init__(self,
