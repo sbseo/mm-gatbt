@@ -109,7 +109,7 @@ class MultimodalGATBertEncoder(nn.Module):
         gembed = torch.stack(glist)
         gembed = gembed.permute(1,0,2)
 
-        node_embed_out = self.img_embeddings(gembed, img_tok)
+        node_embed_out = self.node_embeddings(gembed, img_tok)
         txt_embed_out = self.txt_embeddings(input_txt, segment)
         encoder_input = torch.cat([node_embed_out, txt_embed_out], 1)  # Bx(TEXT+IMG)xHID
         
