@@ -1,2 +1,15 @@
 .idea/
 fb/
+*.txt
+*.sh
+*.out
+*.pth
+
+mmbt_model*
+vico_model*
+.ipynb_checkpoints/
+mmbt/__pycache__/
+mmbt/data/__pycache__/
+mmbt/models/__pycache__/
+mmbt/utils/__pycache__/
+mmbt/loading-net.ipynb
