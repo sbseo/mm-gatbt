@@ -65,8 +65,8 @@ def train(g, model, args, logger):
         
         with torch.no_grad():   
             model.eval()
-            y = pred.cpu().detach().numpy() == 1
-            y_hat = labels.cpu().detach().numpy() > args.threshold
+            y = labels.cpu().detach().numpy() == 1
+            y_hat = pred.cpu().detach().numpy() > args.threshold
             # y = np.vstack(labels)
             # y_hat = np.vstack(pred)
             # y = y==1
@@ -88,18 +88,20 @@ def train(g, model, args, logger):
                 if args.save_model:
                     save_name = str(args.name)+".pth"
                     torch.save(model.state_dict(), save_name)
+                    
+                    # save labels
+                    f = open("./{}_pred.txt".format(args.name), "w")
+                    f2 = open("./{}_true.txt".format(args.name), "w")
+                    
+                    for sen in y_hat[test_mask.cpu()]:
+                        sen = " ".join([str(num) for num in list(map(lambda x: int(x), sen))])
+                        f.write(f"{sen} \n")
+                    for sen in y[test_mask.cpu()]:
+                        sen = " ".join([str(num) for num in list(map(lambda x: int(x), sen))])
+                        f2.write(f"{sen} \n")
+                    f.close()
+                    f2.close()
 
-                # save labels
-                # f = open("./{}_lr-{}_pred.txt".format(args.model, args.lr), "w")
-                # f2 = open("./{}_lr-{}_true.txt".format(args.model, args.lr), "w")
-                
-                # for sen in y_hat[test_mask.cpu()]:
-                #     f.write(str(sen))
-                #     f.write("\n")
-                # for sen in y[test_mask.cpu()]:
-                #     f2.write(str(sen))
-                #     f2.write("\n")
-                
         # Backward
         optimizer.zero_grad()
         loss.backward()

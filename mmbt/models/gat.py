@@ -17,7 +17,7 @@ import torch.nn.functional as F
 from data.graph_datasets import MovieDataset
 from data.graph_datasets import MovieDataset_dev
 from dgl.nn import GATConv
-
+# from dgl.nn.pytorch.conv import GATv2Conv
 
 class GAT(nn.Module):
     def __init__(self,
@@ -160,5 +160,7 @@ class GATEncoder(nn.Module):
         for k in dic.keys():
             if k in [f"gat_layers.{last_layer}.attn_l", f"gat_layers.{last_layer}.attn_r", f"gat_layers.{last_layer}.bias", f"gat_layers.{last_layer}.fc.weight", f"gat_layers.{last_layer}.res_fc.weight"]:
                 continue
+            # if k in [f"gat_layers.{last_layer}.attn", f"gat_layers.{last_layer}.fc_src.weight", f"gat_layers.{last_layer}.fc_src.bias", f"gat_layers.{last_layer}.fc_dst.weight", f"gat_layers.{last_layer}.fc_dst.bias", f"gat_layers.{last_layer}.res_fc.bias"]:
+            #     continue
             dic2[k] = dic[k]
         return dic2

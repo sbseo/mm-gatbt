@@ -1,13 +1,14 @@
 import argparse
 import os
+import random
 
 import dgl
+import numpy as np
 import torch
 import torch.nn.functional as F
 from transformers import BertTokenizer
 
-from data.graph_datasets import MovieDataset
-from data.graph_datasets import MovieDataset_dev
+from data.graph_datasets import MovieDataset, MovieDataset_dev
 from data.helpers import get_glove_words, get_labels_and_frequencies
 from data.vocab import Vocab
 from gcn_train import train
@@ -62,12 +63,19 @@ def get_args(parser):
     parser.add_argument("--gat_feat_drop", type=float, default="0.1")                    
     parser.add_argument("--gat_slope", type=float, default="0.1")                    
     parser.add_argument("--save_model", type=bool, default=False)                    
+    parser.add_argument("--activation", type=str, default="elu", choices=["none", "relu", "elu"])
+
+    # dev
+    parser.add_argument("--dev", type=bool, default=False)            
+    parser.add_argument("--img_infeat", type=int, default=1000)            
+    parser.add_argument("--load_imgembed", type=int, default=1)            
 
     # GAT
     parser.add_argument("--num_heads", type=int, default=8)                    
     parser.add_argument("--num_hidden", type=int, default=16)                    
     parser.add_argument("--num_layers", type=int, default=3)           
     parser.add_argument("--num_output_heads", type=int, default=3)
+
 
     # weight
     parser.add_argument("--weight", type=int, default=0)
@@ -102,13 +110,21 @@ if __name__=="__main__":
         os.path.join(args.data_path, args.task, "train.jsonl")
     )
     args.n_classes = len(args.labels)
-    dataset = MovieDataset(args)
+    if args.dev:
+        dataset = MovieDataset_dev(args)
+    else:
+        dataset = MovieDataset(args)
     graph = dataset[0].to('cuda')
     if args.save_model:
         logger.write(f"{graph} \n")
     print(graph)
 
-
+    if args.activation == "none":
+        args.activation = None
+    elif args.activation == "elu":
+        args.activation = F.elu
+    elif args.activation == "relu":
+        args.activation = F.relu
 
     # Create the model with given dimensions
     if args.model == "gcn":
@@ -132,7 +148,7 @@ if __name__=="__main__":
                     num_hidden=args.num_hidden, #default 10
                     num_classes=args.n_classes,
                     heads=heads,
-                    activation=F.elu,
+                    activation=args.activation,
                     feat_drop=args.gat_feat_drop, #default .1
                     attn_drop=args.gat_attn_drop,
                     negative_slope=args.gat_slope,

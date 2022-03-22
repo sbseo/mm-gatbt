@@ -8,8 +8,8 @@ Author's code: https://github.com/tech-srl/how_attentive_are_gats
 
 import torch
 import torch.nn as nn
-from dgl.nn import GATv2Conv
-
+from dgl.nn.pytorch.conv import GATv2Conv
+    
 
 class GATv2(nn.Module):
     def __init__(self,

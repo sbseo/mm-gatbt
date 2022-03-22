@@ -1,18 +1,20 @@
 import os
+
 import dgl
 import numpy as np
 import pandas as pd
 import torch
+import torchvision
+import torchvision.transforms as transforms
 from dgl.data import DGLDataset
-from torch.utils.data.sampler import SequentialSampler
-from torch.utils.data import TensorDataset, DataLoader
-# from transformers import BertTokenizer, BertModel
-from transformers import BertTokenizer
+from PIL import Image
 # from pytorch_pretrained_bert import BertTokenizer
 from pytorch_pretrained_bert.modeling import BertModel
-from PIL import Image
-import torchvision.transforms as transforms
-import torchvision
+from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data.sampler import SequentialSampler
+from tqdm import tqdm
+# from transformers import BertTokenizer, BertModel
+from transformers import BertTokenizer
 
 from data.img_dataset import ImageDataset
 
@@ -113,9 +115,6 @@ class MovieDataset(DGLDataset):
             ]
         )
         if self.args.img_enc != 'none':
-            im_dataset = ImageDataset(self.args, nodes_data)
-            data_loader = DataLoader(im_dataset, batch_size=16, shuffle=False, num_workers=12)
-            
             # this is typo. res should be changed to mobile.
             if self.args.img_enc == 'res':
                 model = torchvision.models. mobilenet_v3_small(pretrained=True)
@@ -125,53 +124,26 @@ class MovieDataset(DGLDataset):
                 model = torchvision.models.efficientnet_b6(pretrained=True)
             elif self.args.img_enc == 'resnet152':
                 model = torchvision.models.resnet152(pretrained=True)
+            
+            if self.args.load_imgembed:
+                node_features = torch.load('eff_embedding.pt')
+            else:
+                im_dataset = ImageDataset(self.args, nodes_data)
+                data_loader = DataLoader(im_dataset, batch_size=16, shuffle=False, num_workers=12)
                 
-            model.eval()
-            # model = model.to('cuda')
-            node_features = list()
-            with torch.no_grad():
-                for batch in data_loader:
-                    im = batch
-                    # feat.shape: torch.Size([16, 1000])
-                    feat = model(im)
-                    node_features.append(feat.unsqueeze(0))
-            # im_data = TensorDataset(imgs)
-            # data_sampler = SequentialSampler(im_data)
-            # im_data_loader = DataLoader(im_data, sampler=data_sampler,num_workers=16, batch_size=self.args.batch_sz)
-            
-            
-            
-            # imgs = [torch.tensor([i]) for i in range(len(nodes_data['image']))]
-            # imgs = torch.stack(imgs)
-            # print(imgs.shape)
-            # im_data = TensorDataset(imgs)
-            # data_sampler = SequentialSampler(im_data)
-            # im_data_loader = DataLoader(im_data, sampler=data_sampler,num_workers=16, batch_size=self.args.batch_sz)
-            # model = torchvision.models.resnet152(pretrained=True)
-            # node_features = list()
-            # model = model.to('cuda')
-            # with torch.no_grad():
-            #     for batch in im_data_loader:
-            #         for x in batch[0]:
-            #             x = x.item()
-            #             img_path = nodes_data['image'][x]
-            #             img = Image.open(
-            #                 os.path.join(self.args.data_path, img_path)
-            #             ).convert("RGB")
-            #             img = transform(img)
-            #             img = img.unsqueeze(0)
-            #             img = img.to('cuda')
-            #             feat = model(img)
-            #             node_features.append(feat.unsqueeze(0))
-
-            # model = torchvision.models.resnet152(pretrained=True).cuda()
-            # for i, x in enumerate(imgs):
-            #     print(i)
-            #     output = model(x.cuda())
-            #     node_features.append(output.detach().cpu())
-            node_features = torch.cat(node_features, dim=1)
-            node_features = node_features.squeeze(0)
-            print(node_features.shape)
+                model.eval()
+                # model = model.to('cuda')
+                node_features = list()
+                print("start loading img")
+                with torch.no_grad():
+                    for batch in tqdm(data_loader, total=len(data_loader)):
+                        im = batch
+                        # feat.shape: torch.Size([16, 1000])
+                        feat = model(im)
+                        node_features.append(feat.unsqueeze(0))
+                node_features = torch.cat(node_features, dim=1)
+                node_features = node_features.squeeze(0)
+                print(node_features.shape)
 
         print("complete")
         # 2) update label representation
