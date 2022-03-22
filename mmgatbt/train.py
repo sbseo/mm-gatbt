@@ -26,7 +26,7 @@ from utils.utils import *
 def get_args(parser):
     parser.add_argument("--batch_sz", type=int, default=128)
     parser.add_argument("--bert_model", type=str, default="bert-base-uncased", choices=["prajjwal1/bert-tiny", "bert-base-uncased", "bert-large-uncased"])
-    parser.add_argument("--data_path", type=str, default="/path/to/data_dir/")
+    parser.add_argument("--data_path", type=str, default="../dataset")
     parser.add_argument("--drop_img_percent", type=float, default=0.0)
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--embed_sz", type=int, default=300)

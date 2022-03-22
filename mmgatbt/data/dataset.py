@@ -21,12 +21,11 @@ from utils.utils import truncate_seq_pair, numpy_seed
 class JsonlDataset(Dataset):
     def __init__(self, data_path, tokenizer, transforms, vocab, args):
         self.data = [json.loads(l) for l in open(data_path)]
-        # self.data_dir = os.path.dirname(data_path)
-        self.data_dir = "../dataset"
         self.tokenizer = tokenizer
         self.args = args
         self.vocab = vocab
         self.n_classes = len(args.labels)
+        self.data_path = self.args.data_path
         if args.model in ["mmbt", "mmsagebt", "mmsagebt2","mmgatbt","mmgatbt2"]:
             self.text_start_token = ["[SEP]"]
         else:
@@ -85,7 +84,7 @@ class JsonlDataset(Dataset):
         if self.args.model in ["img", "concatbow", "concatbert", "mmbt", "mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
             if self.data[index]["image"]:
                 image = Image.open(
-                    os.path.join(self.data_dir, self.data[index]["image"])
+                    os.path.join(self.data_path, self.data[index]["image"])
                 ).convert("RGB")
             else:
                 image = Image.fromarray(128 * np.ones((256, 256, 3), dtype=np.uint8))
