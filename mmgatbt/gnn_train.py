@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 from transformers import BertTokenizer
 
-from data.graph_datasets import MovieDataset, MovieDataset_dev
+from data.graph_datasets import MovieDataset
 from data.helpers import get_glove_words, get_labels_and_frequencies
 from data.vocab import Vocab
 from gcn_train import train
