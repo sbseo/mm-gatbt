@@ -14,7 +14,6 @@ from models.concat_bow import  MultimodalConcatBowClf
 from models.image import ImageClf
 from models.mmbt import MultimodalBertClf
 from models.concat_gcn_bert import MultimodalConcatGCNBertClf
-from models.mmsagebt import MultimodalSageBertClf
 from models.mmsagebt2 import MultimodalSageBert2Clf
 from models.mmgatbt import MultimodalGATBertClf
 
@@ -25,7 +24,6 @@ MODELS = {
     "concatbert": MultimodalConcatBertClf,
     "img": ImageClf,
     "mmbt": MultimodalBertClf,
-    "mmsagebt": MultimodalSageBertClf,
     "mmsagebt2": MultimodalSageBert2Clf,
     "mmgatbt": MultimodalGATBertClf,
     "gcn_bert": MultimodalConcatGCNBertClf,
