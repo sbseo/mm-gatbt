@@ -48,12 +48,12 @@ def train(g, model, args, logger):
                 best_test_acc = test_acc
                 best_test_acc_macro = test_acc_macro
                 if args.save_model:
-                    save_name = str(args.name)+".pth"
+                    save_name = f"{args.name}/{args.name}.pth"
                     torch.save(model.state_dict(), save_name)
                     
                     # save labels
-                    f = open("./{}_pred.txt".format(args.name), "w")
-                    f2 = open("./{}_true.txt".format(args.name), "w")
+                    f = open("./{}/test_labels_pred.txt".format(args.name), "w")
+                    f2 = open("./{}/test_labels_gold.txt".format(args.name), "w")
                     
                     for sen in y_hat[test_mask.cpu()]:
                         sen = " ".join([str(num) for num in list(map(lambda x: int(x), sen))])

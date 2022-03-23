@@ -11,7 +11,7 @@ from transformers import BertTokenizer
 from data.graph_datasets import MovieDataset
 from data.helpers import get_glove_words, get_labels_and_frequencies
 from data.vocab import Vocab
-from gcn_train import train
+from utils.gnn_utils import train
 from models.gat import GAT
 from models.gcn import GCN
 from models.graphsage import GraphSAGE
@@ -54,7 +54,7 @@ def get_args(parser):
     parser.add_argument("--task_type", type=str, default="multilabel", choices=["multilabel", "classification"])
     parser.add_argument("--warmup", type=float, default=0.1)
     parser.add_argument("--weight_classes", type=int, default=1)
-    parser.add_argument("--epoch", type=int, default=80000)
+    parser.add_argument("--epoch", type=int, default=20000)
     parser.add_argument("--threshold", type=float, default=0.25)
     parser.add_argument("--scheduler", type=bool, default=False)
     parser.add_argument("--aggregator", type=str, default="gcn",
@@ -87,7 +87,8 @@ if __name__=="__main__":
     assert remaining_args == [], remaining_args
     
     if args.save_model:
-        logger = open(os.path.join(f"{args.name}.txt"), "a+")
+        os.makedirs(f"{args.name}/")
+        logger = open(os.path.join(args.name, f"{args.name}.txt"), "a+")
         logger.write(f"{args} \n")
     print(args)
     
