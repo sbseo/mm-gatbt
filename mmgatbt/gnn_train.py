@@ -20,7 +20,7 @@ from models.graphsage import GraphSAGE
 def get_args(parser):
     parser.add_argument("--batch_sz", type=int, default=128)
     parser.add_argument("--txt_enc", type=str, default="glove", choices=["glove", "bert"])
-    parser.add_argument("--img_enc", type=str, default="none", choices=["mobile", "eff", "eff6", "resnet152", "none"])
+    parser.add_argument("--img_enc", type=str, default="eff", choices=["mobile", "eff", "eff6", "resnet152", "none"])
     parser.add_argument("--bert_model", type=str, default="bert-base-uncased", choices=["prajjwal1/bert-tiny","bert-base-uncased", "bert-large-uncased"])
     parser.add_argument("--data_path", type=str, default="../dataset/")
     parser.add_argument("--imdir_path", type=str, default="../dataset/mmimdb/dataset")
@@ -62,7 +62,7 @@ def get_args(parser):
     parser.add_argument("--gat_attn_drop", type=float, default="0.1")                    
     parser.add_argument("--gat_feat_drop", type=float, default="0.1")                    
     parser.add_argument("--gat_slope", type=float, default="0.1")                    
-    parser.add_argument("--save_model", type=bool, default=False)                    
+    parser.add_argument("--save_model", type=bool, default=True)                    
     parser.add_argument("--activation", type=str, default="elu", choices=["none", "relu", "elu"])
 
     # dev
@@ -72,7 +72,7 @@ def get_args(parser):
 
     # GAT
     parser.add_argument("--num_heads", type=int, default=8)                    
-    parser.add_argument("--num_hidden", type=int, default=16)                    
+    parser.add_argument("--num_hidden", type=int, default=32)                    
     parser.add_argument("--num_layers", type=int, default=3)           
     parser.add_argument("--num_output_heads", type=int, default=3)
 
