@@ -1,6 +1,6 @@
 ###
 # 1) mmimdb graph dataset should not be splited into train/test dataset
-# 2) all node numbers should start from 0. That is, remap all id numbers.
+# 2) all node numbers should start from 0. That is, this script will remap all id numbers.
 ### 
 
 
@@ -14,7 +14,7 @@ def format_mmimdb_add_staff(dataset_root_path, file_name, save_name):
     """return dictionary which includes movie info and staff.
     
     Requirement:
-        `train.jsonl` created by mmimdb.py
+        `unsplitted.jsonl` created by mmimdb.py.
 
     Args:
         dataset_root_path (str): root path mm-imdb dataset
@@ -38,7 +38,7 @@ def format_mmimdb_add_staff(dataset_root_path, file_name, save_name):
     
     dobj = defaultdict()
     f = open(os.path.join(dataset_root_path, file_name), 'r')
-    files = os.listdir(os.path.join(dataset_root_path, "dataset"))
+    files = os.listdir(os.path.join(dataset_root_path, 'mmimdb', "dataset"))
 
     for sen in f:
         data = json.loads(sen)
@@ -47,7 +47,7 @@ def format_mmimdb_add_staff(dataset_root_path, file_name, save_name):
     for file_name in files:
         idx = file_name.split(".")[0]
         if "json" in file_name and dobj.get(idx, None):
-            file_path = os.path.join(dataset_root_path, "dataset", file_name)
+            file_path = os.path.join(dataset_root_path, 'mmimdb', "dataset", file_name)
             _f = open(file_path)
             _data = json.load(_f)
             
@@ -124,7 +124,7 @@ def save_mmimdb_dataset_to_csv(dic, dataset_root_path, save_name):
 
 
 if __name__=="__main__":
-    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl
+    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl medium
     # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl sparse
     # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl dense
     # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl medium_weight
