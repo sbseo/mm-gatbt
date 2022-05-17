@@ -96,7 +96,6 @@ class MultimodalGATBertEncoder(nn.Module):
             .cuda()
         )
 
-        # [8,200] -> [8, 3, 576]
         gembed = self.genc(nid).cuda()
         if self.args.num_image_embeds==1:
             glist = [gembed] * self.args.num_image_embeds
