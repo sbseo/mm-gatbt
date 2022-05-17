@@ -27,7 +27,7 @@ class JsonlDataset(Dataset):
         self.vocab = vocab
         self.n_classes = len(args.labels)
         self.data_path = self.args.data_path
-        if args.model in ["mmbt", "mmsagebt", "mmsagebt2","mmgatbt","mmgatbt2"]:
+        if args.model in ["mmbt", "mmsagebt", "mmgatbt"]:
             self.text_start_token = ["[SEP]"]
         else:
             self.text_start_token = ["[CLS]"]  
@@ -38,7 +38,7 @@ class JsonlDataset(Dataset):
                     row["img"] = None
 
         self.max_seq_len = args.max_seq_len
-        if args.model in ["mmbt", "mmsagebt", "mmsagebt2","mmgatbt","mmgatbt2"]:
+        if args.model in ["mmbt", "mmsagebt", "mmgatbt"]:
             self.max_seq_len -= args.num_image_embeds
 
         self.transforms = transforms
@@ -73,7 +73,7 @@ class JsonlDataset(Dataset):
             )
 
         image = None
-        if self.args.model in ["img", "concatbow", "concatbert", "mmbt", "mmsagebt", "mmsagebt2","mmgatbt"]:
+        if self.args.model in ["img", "concatbow", "concatbert", "mmbt", "mmsagebt", "mmgatbt"]:
             if self.data[index]["image"]:
                 im_name = self.data[index]["image"].split("/")[-1]
                 im = cv2.imread(os.path.join(os.path.join(self.args.imdir_path, im_name)))
@@ -101,7 +101,7 @@ class JsonlDataset(Dataset):
             # The first segment (0) is of images.
             segment += 1
 
-        if self.args.model in ["mmsagebt", "mmsagebt2","mmgatbt"]:
+        if self.args.model in ["mmsagebt", "mmgatbt"]:
             # The first SEP is part of Image Token.
             segment = segment[1:]
             sentence = sentence[1:]
