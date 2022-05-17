@@ -15,6 +15,7 @@ from tqdm import tqdm
 from transformers import BertTokenizer
 
 from data.img_dataset import ImageDataset
+from data.helpers import get_transforms
 
 
 class MovieDataset(DGLDataset):
@@ -50,24 +51,20 @@ class MovieDataset(DGLDataset):
         nodes_data = pd.read_csv(os.path.join(self.args.graph_path,'node_data.csv'))
         edges_data = pd.read_csv(os.path.join(self.args.graph_path, 'edge_data.csv'))
 
-        # 1) update feature representation. let's use glove
-        if self.args.txt_enc == "glove":
+        # create text-based node embedding
+        if self.args.txt_enc == "glove" and self.args.img_enc == 'none':
             x = nodes_data['text'].str.split().to_list()
             x = list(map(lambda sen: ["[CLS]"] + sen, x))
             x = list(map(lambda sen: self.glove_enc(sen), x))
             node_features = torch.from_numpy(np.array(x))
             print(node_features.shape)
-        elif self.args.txt_enc == "bert":
+        elif self.args.txt_enc == "bert" and self.args.img_enc == 'none':
             tokenizer = BertTokenizer.from_pretrained(self.args.bert_model)
             model = BertModel.from_pretrained(self.args.bert_model).cuda()
             best_params = torch.load("../bert_base/model_best.pt")
             best_params = self.preprocess(best_params["state_dict"])
             model.load_state_dict(best_params)
             model.eval()
-            # tokenized = nodes_data['text'].apply((lambda sen: tokenizer.encode_plus(sen, add_special_tokens = True, truncation = True, padding = "max_length", return_attention_mask = False, return_tensors = "pt")))
-            # print(tokenized.values)
-            
-            # x = np.array(tokenized.values)
             x = list()
             attention_mask = list()
             for sen in nodes_data['text'].tolist():
@@ -97,19 +94,8 @@ class MovieDataset(DGLDataset):
             print(node_features.shape)
 
 
-        # 1-2) img
+        # create image-based node embedding
         # Image.warnings.simplefilter('error', Image.DecompressionBombWarning)
-        transform = transforms.Compose(
-            [
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.46777044, 0.44531429, 0.40661017],
-                    std=[0.12221994, 0.12145835, 0.14380469],
-                ),
-            ]
-        )
         if self.args.img_enc != 'none':
             if self.args.img_enc == 'mobile':
                 model = torchvision.models. mobilenet_v3_small(pretrained=True)
