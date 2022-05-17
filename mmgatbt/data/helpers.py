@@ -173,28 +173,8 @@ def get_data_loaders(args):
         collate_fn=collate,
     )
 
-    if args.task == "vsnli":
-        test_hard = JsonlDataset(
-            os.path.join(args.data_path, args.task, "test_hard.jsonl"),
-            tokenizer,
-            transforms,
-            vocab,
-            args,
-        )
-
-        test_hard_loader = DataLoader(
-            test_hard,
-            batch_size=args.batch_sz,
-            shuffle=False,
-            num_workers=args.n_workers,
-            collate_fn=collate,
-        )
-
-        test = {"test": test_loader, "test_hard": test_hard_loader}
-
-    else:
-        test = {
-            "test": test_loader,
-        }
+    test = {
+        "test": test_loader,
+    }
 
     return train_loader, val_loader, test
