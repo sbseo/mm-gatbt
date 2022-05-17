@@ -65,8 +65,6 @@ def get_args(parser):
     parser.add_argument("--save_model", type=bool, default=True)                    
     parser.add_argument("--activation", type=str, default="elu", choices=["none", "relu", "elu"])
 
-    # dev
-    parser.add_argument("--dev", type=bool, default=False)            
     parser.add_argument("--img_infeat", type=int, default=1000)            
     parser.add_argument("--load_imgembed", type=str, default="eff_embedding.pt")            
 
@@ -75,7 +73,6 @@ def get_args(parser):
     parser.add_argument("--num_hidden", type=int, default=32)                    
     parser.add_argument("--num_layers", type=int, default=3)           
     parser.add_argument("--num_output_heads", type=int, default=3)
-
 
     # weight
     parser.add_argument("--weight", type=int, default=0)
@@ -111,10 +108,8 @@ if __name__=="__main__":
         os.path.join(args.data_path, "train.jsonl")
     )
     args.n_classes = len(args.labels)
-    if args.dev:
-        dataset = MovieDataset_dev(args)
-    else:
-        dataset = MovieDataset(args)
+
+    dataset = MovieDataset(args)
     graph = dataset[0].to('cuda')
     if args.save_model:
         logger.write(f"{graph} \n")
