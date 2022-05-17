@@ -16,7 +16,7 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset
 
-from utils.utils import truncate_seq_pair, numpy_seed
+from utils.utils import numpy_seed
 
 
 class JsonlDataset(Dataset):
