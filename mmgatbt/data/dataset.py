@@ -47,22 +47,13 @@ class JsonlDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        if self.args.task == "vsnli":
-            sent1 = self.tokenizer(self.data[index]["sentence1"])
-            sent2 = self.tokenizer(self.data[index]["sentence2"])
-            truncate_seq_pair(sent1, sent2, self.args.max_seq_len - 3)
-            sentence = self.text_start_token + sent1 + ["[SEP]"] + sent2 + ["[SEP]"]
-            segment = torch.cat(
-                [torch.zeros(2 + len(sent1)), torch.ones(len(sent2) + 1)]
-            )
-        else:
-            sentence = (
-                self.text_start_token
-                + self.tokenizer(self.data[index]["text"])[
-                    : (self.args.max_seq_len - 1)
-                ]
-            )
-            segment = torch.zeros(len(sentence))
+        sentence = (
+            self.text_start_token
+            + self.tokenizer(self.data[index]["text"])[
+                : (self.args.max_seq_len - 1)
+            ]
+        )
+        segment = torch.zeros(len(sentence))
 
         sentence = torch.LongTensor(
             [

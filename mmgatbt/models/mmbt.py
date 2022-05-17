@@ -60,16 +60,6 @@ class MultimodalBertEncoder(nn.Module):
         bert = BertModel.from_pretrained(args.bert_model)
         self.txt_embeddings = bert.embeddings
 
-        if args.task == "vsnli":
-            ternary_embeds = nn.Embedding(3, args.hidden_sz)
-            ternary_embeds.weight.data[:2].copy_(
-                bert.embeddings.token_type_embeddings.weight
-            )
-            ternary_embeds.weight.data[2].copy_(
-                bert.embeddings.token_type_embeddings.weight.data.mean(dim=0)
-            )
-            self.txt_embeddings.token_type_embeddings = ternary_embeds
-
         self.img_embeddings = ImageBertEmbeddings(args, self.txt_embeddings)
         self.img_encoder = ImageEncoder(args)
         self.encoder = bert.encoder
