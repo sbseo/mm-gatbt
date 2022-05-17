@@ -10,7 +10,6 @@
 import json
 import numpy as np
 import os
-import cv2
 from PIL import Image
 
 import torch
@@ -76,20 +75,9 @@ class JsonlDataset(Dataset):
         if self.args.model in ["img", "concatbow", "concatbert", "mmbt", "mmsagebt", "mmgatbt"]:
             if self.data[index]["image"]:
                 im_name = self.data[index]["image"].split("/")[-1]
-                im = cv2.imread(os.path.join(os.path.join(self.args.imdir_path, im_name)))
-                # im = cv2.imread(os.path.join(self.imdir_path, self.data[index]["image"]))
-                # width = int(im.shape[1] * .25)
-                # height = int(im.shape[0] * .25)
-                # im = cv2.resize(im, (width, height))
-                # im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-                image =  Image.fromarray(im)
-
-                # image = Image.open(
-                #     os.path.join(self.data_path, self.data[index]["image"])
-                # ).convert("RGB")
-                # width, height = image.size
-                # width, height = int(width * .25), int(height * .25)
-                # image = image.resize((width, height))
+                image = Image.open(
+                    os.path.join(self.args.imdir_path, im_name)
+                ).convert("RGB")
             else:
                 image = Image.fromarray(128 * np.ones((256, 256, 3), dtype=np.uint8))
             image = self.transforms(image)

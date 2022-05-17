@@ -66,7 +66,7 @@ def get_args(parser):
     parser.add_argument("--activation", type=str, default="elu", choices=["none", "relu", "elu"])
 
     parser.add_argument("--img_infeat", type=int, default=1000)            
-    parser.add_argument("--load_imgembed", type=str, default="eff_embedding.pt")            
+    parser.add_argument("--load_imgembed", type=str, default="")            
 
     # GAT
     parser.add_argument("--num_heads", type=int, default=8)                    

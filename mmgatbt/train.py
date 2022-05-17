@@ -75,7 +75,7 @@ def get_args(parser):
 
    # weight
     parser.add_argument("--weight", type=int, default=0)
-    parser.add_argument("--load_imgembed", type=str, default="eff_embedding.pt")
+    parser.add_argument("--load_imgembed", type=str, default="")
     
 def get_criterion(args):
     if args.task_type == "multilabel":
