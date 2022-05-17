@@ -78,9 +78,7 @@ class MovieDataset(DGLDataset):
             x = torch.stack(x).squeeze()
             print(x, x.shape)
             attention_mask = torch.stack(attention_mask).squeeze()
-            # attention_mask = attention_mask.cuda()
-            # x = x.cuda()
-            # TO DO: use dataloader 
+            
             data = TensorDataset(x, attention_mask)
             data_sampler = SequentialSampler(data)
             data_loader = DataLoader(data, sampler=data_sampler, batch_size=self.args.batch_sz)
@@ -113,7 +111,6 @@ class MovieDataset(DGLDataset):
             ]
         )
         if self.args.img_enc != 'none':
-            # this is typo. res should be changed to mobile.
             if self.args.img_enc == 'mobile':
                 model = torchvision.models. mobilenet_v3_small(pretrained=True)
             elif self.args.img_enc == 'eff':
@@ -124,13 +121,12 @@ class MovieDataset(DGLDataset):
                 model = torchvision.models.resnet152(pretrained=True)
             
             if self.args.load_imgembed:
-                node_features = torch.load('eff_embedding.pt')
+                node_features = torch.load(self.args.load_imgembed)
             else:
                 im_dataset = ImageDataset(self.args, nodes_data)
                 data_loader = DataLoader(im_dataset, batch_size=16, shuffle=False, num_workers=12)
                 
                 model.eval()
-                # model = model.to('cuda')
                 node_features = list()
                 print("start loading img")
                 with torch.no_grad():
@@ -155,11 +151,6 @@ class MovieDataset(DGLDataset):
                 node_labels[i, self.args.labels.index(tgt)] = 1
 
         
-        """legacy
-        node_features = torch.from_numpy(nodes_data['text'].astype('category').cat.
-        des.to_numpy())
-        node_labels = torch.from_numpy(nodes_data['label'].astype('category').cat.codes.to_numpy())
-        """
         print(node_features)
         print(node_labels)
 
@@ -182,7 +173,6 @@ class MovieDataset(DGLDataset):
         # masks indicating whether a node belongs to training, validation, and test set.
         n_nodes = nodes_data.shape[0]
         n_train = int(15513)
-        # n_train = int(n_nodes * 0.8)
         n_val = int(n_nodes * 0)
         train_mask = torch.zeros(n_nodes, dtype=torch.bool)
         test_mask = torch.zeros(n_nodes, dtype=torch.bool)
@@ -190,9 +180,6 @@ class MovieDataset(DGLDataset):
         test_mask[n_train + n_val:] = True
         self.graph.ndata['train_mask'] = train_mask
         self.graph.ndata['test_mask'] = test_mask
-        # val_mask = torch.zeros(n_nodes, dtype=torch.bool)
-        # val_mask[n_train:n_train + n_val] = True
-        # self.graph.ndata['val_mask'] = val_mask
 
 
     def __getitem__(self, i):

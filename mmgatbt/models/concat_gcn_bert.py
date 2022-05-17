@@ -36,15 +36,9 @@ class MultimodalConcatGCNBertClf(nn.Module):
 
     def forward(self, txt, mask, segment, img):
         txt = self.txtenc(txt, mask, segment)
-        # print(img)
         img = self.genc(img).cuda()
         
-        # out = txt
-        # print(txt.shape)
         out = torch.cat([txt, img], -1)
         for layer in self.clf:
             out = layer(out)
         return out
-
-
-# python3 mmbt/train.py --batch_sz 8 --gradient_accumulation_steps 40  --savedir ./ --name gcn_bert_dev --bert_model bert-base-uncased --data_path ../dataset/  --task mmimdb --task_type multilabel  --model gcn_bert --freeze_txt 5 --patience 5 --dropout 0.1 --lr 5e-05 --warmup 0.1 --max_epochs 100 --img_hidden_sz 0

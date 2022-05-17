@@ -114,7 +114,7 @@ def get_data_loaders(args):
     transforms = get_transforms(args)
 
     args.labels, args.label_freqs = get_labels_and_frequencies(
-        os.path.join(args.data_path, args.task, "train.jsonl")
+        os.path.join("train.jsonl")
     )
     vocab = get_vocab(args)
     args.vocab = vocab
@@ -122,7 +122,7 @@ def get_data_loaders(args):
     args.n_classes = len(args.labels)
 
     train = JsonlDataset(
-        os.path.join(args.data_path, args.task, "train.jsonl"),
+        os.path.join("train.jsonl"),
         tokenizer,
         transforms,
         vocab,
@@ -132,7 +132,7 @@ def get_data_loaders(args):
     args.train_data_len = len(train)
 
     dev = JsonlDataset(
-        os.path.join(args.data_path, args.task, "dev.jsonl"),
+        os.path.join("dev.jsonl"),
         tokenizer,
         transforms,
         vocab,
@@ -158,7 +158,7 @@ def get_data_loaders(args):
     )
 
     test_set = JsonlDataset(
-        os.path.join(args.data_path, args.task, "test.jsonl"),
+        os.path.join("test.jsonl"),
         tokenizer,
         transforms,
         vocab,
@@ -193,25 +193,8 @@ def get_data_loaders(args):
         test = {"test": test_loader, "test_hard": test_hard_loader}
 
     else:
-        test_gt = JsonlDataset(
-            os.path.join(args.data_path, args.task, "test_hard_gt.jsonl"),
-            tokenizer,
-            transforms,
-            vocab,
-            args,
-        )
-
-        test_gt_loader = DataLoader(
-            test_gt,
-            batch_size=args.batch_sz,
-            shuffle=False,
-            num_workers=args.n_workers,
-            collate_fn=collate,
-        )
-
         test = {
             "test": test_loader,
-            "test_gt": test_gt_loader,
         }
 
     return train_loader, val_loader, test

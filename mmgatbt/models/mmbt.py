@@ -24,8 +24,6 @@ class ImageBertEmbeddings(nn.Module):
         self.word_embeddings = embeddings.word_embeddings
         self.LayerNorm = embeddings.LayerNorm
         self.dropout = nn.Dropout(p=args.dropout)
-        # self.lstm = nn.LSTM(args.hidden_sz, args.hidden_sz//2, 1, bidirectional=True)
-
 
     def forward(self, input_imgs, token_type_ids):
         bsz = input_imgs.size(0)
@@ -40,7 +38,6 @@ class ImageBertEmbeddings(nn.Module):
         sep_token_embeds = self.word_embeddings(sep_id)
 
         imgs_embeddings = self.img_embeddings(input_imgs)
-        # imgs_embeddings, _ = self.lstm(imgs_embeddings)
 
         token_embeddings = torch.cat(
             [cls_token_embeds, imgs_embeddings, sep_token_embeds], dim=1

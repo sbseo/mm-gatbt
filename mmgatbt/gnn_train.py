@@ -22,9 +22,9 @@ def get_args(parser):
     parser.add_argument("--txt_enc", type=str, default="glove", choices=["glove", "bert"])
     parser.add_argument("--img_enc", type=str, default="eff", choices=["mobile", "eff", "eff6", "resnet152", "none"])
     parser.add_argument("--bert_model", type=str, default="bert-base-uncased", choices=["prajjwal1/bert-tiny","bert-base-uncased", "bert-large-uncased"])
-    parser.add_argument("--data_path", type=str, default="../dataset/")
-    parser.add_argument("--imdir_path", type=str, default="../dataset/mmimdb/dataset")
-    parser.add_argument("--graph_path", type=str, default="../dataset/mmimdb/")
+    parser.add_argument("--data_path", type=str, default="./")
+    parser.add_argument("--imdir_path", type=str, default="./mmimdb/dataset")
+    parser.add_argument("--graph_path", type=str, default="./")
     parser.add_argument("--drop_img_percent", type=float, default=0.0)
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--embed_sz", type=int, default=300)
@@ -50,8 +50,8 @@ def get_args(parser):
     parser.add_argument("--savedir", type=str, default="./checkpoint/",
                         help="/path/to/save_dir/")                    
     parser.add_argument("--seed", type=int, default=123)
-    parser.add_argument("--task", type=str, default="mmimdb", choices=["mmimdb", "vsnli", "food101"])
-    parser.add_argument("--task_type", type=str, default="multilabel", choices=["multilabel", "classification"])
+    parser.add_argument("--task", type=str, default="mmimdb", choices=["mmimdb"])
+    parser.add_argument("--task_type", type=str, default="multilabel", choices=["multilabel"])
     parser.add_argument("--warmup", type=float, default=0.1)
     parser.add_argument("--weight_classes", type=int, default=1)
     parser.add_argument("--epoch", type=int, default=20000)
@@ -68,7 +68,7 @@ def get_args(parser):
     # dev
     parser.add_argument("--dev", type=bool, default=False)            
     parser.add_argument("--img_infeat", type=int, default=1000)            
-    parser.add_argument("--load_imgembed", type=int, default=1)            
+    parser.add_argument("--load_imgembed", type=str, default="eff_embedding.pt")            
 
     # GAT
     parser.add_argument("--num_heads", type=int, default=8)                    
@@ -108,7 +108,7 @@ if __name__=="__main__":
 
 
     args.labels, args.label_freqs = get_labels_and_frequencies(
-        os.path.join(args.data_path, args.task, "train.jsonl")
+        os.path.join(args.data_path, "train.jsonl")
     )
     args.n_classes = len(args.labels)
     if args.dev:

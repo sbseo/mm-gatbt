@@ -1,15 +1,14 @@
-.idea/
-fb/
 *.txt
 *.sh
 *.out
 *.pth
+*.ipynb
+mmimdb.tar.gz
 
-mmbt_model*
-vico_model*
+mmgatbt_model*
 .ipynb_checkpoints/
-mmbt/__pycache__/
-mmbt/data/__pycache__/
-mmbt/models/__pycache__/
-mmbt/utils/__pycache__/
-mmbt/loading-net.ipynb
+mmgatbt/__pycache__/
+mmgatbt/data/__pycache__/
+mmgatbt/models/__pycache__/
+mmgatbt/utils/__pycache__/
+mmimdb
