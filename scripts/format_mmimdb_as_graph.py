@@ -10,11 +10,11 @@ import os
 import json
 import pandas as pd
 
-def format_mmimdb_add_staff(dataset_root_path, file_name, save_name):
+def format_mmimdb_add_staff(dataset_root_path, save_name):
     """return dictionary which includes movie info and staff.
     
     Requirement:
-        `unsplitted.jsonl` created by mmimdb.py.
+        `unsplitted.jsonl` created by format_mmimdb_dataset.py.
 
     Args:
         dataset_root_path (str): root path mm-imdb dataset
@@ -25,7 +25,7 @@ def format_mmimdb_add_staff(dataset_root_path, file_name, save_name):
 
     if save_name == "sparse":
         features = ['director', 'producer', 'writer']
-    elif save_name in ["medium", "medium_weight"]:
+    elif save_name in ["medium"]:
         features = ['director', 'producer', 'writer', 'cinematographer', 'art director']
     elif save_name == 'dense':
         features = ['director', 'producer', 'writer', 'cinematographer', 'art director', 'assistant director', 'editor']
@@ -36,6 +36,7 @@ def format_mmimdb_add_staff(dataset_root_path, file_name, save_name):
     elif save_name == 'director':
         features = ['director']
     
+    file_name = 'unsplitted.jsonl'
     dobj = defaultdict()
     f = open(os.path.join(dataset_root_path, file_name), 'r')
     files = os.listdir(os.path.join(dataset_root_path, 'mmimdb', "dataset"))
@@ -124,12 +125,11 @@ def save_mmimdb_dataset_to_csv(dic, dataset_root_path, save_name):
 
 
 if __name__=="__main__":
-    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl medium
-    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl sparse
-    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl dense
-    # python3 scripts/mmimdb_as_graph.py ../dataset/mmimdb/ unsplitted.jsonl medium_weight
-    save_name = sys.argv[3]
-    dobj = format_mmimdb_add_staff(sys.argv[1], sys.argv[2], save_name)
+    # python3 scripts/format_mmimdb_as_graph.py ./ medium
+    # python3 scripts/format_mmimdb_as_graph.py ./ sparse
+    # python3 scripts/format_mmimdb_as_graph.py ./ dense
+    save_name = sys.argv[2]
+    dobj = format_mmimdb_add_staff(sys.argv[1], save_name)
     dobj = format_mmimdb_add_edge(dobj)
 
     dflatten, edges, idx2node = save_mmimdb_dataset_to_csv(dobj, sys.argv[1], save_name)

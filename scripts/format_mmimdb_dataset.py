@@ -42,7 +42,22 @@ def format_mmimdb_dataset(dataset_root_path):
                     fw.write("%s\n" % json.dumps(dobj))
                 is_save_sample = True
 
+def create_unsplitted_file(dataset_root_path):
+    f1 = open(os.path.join(dataset_root_path, "train.jsonl"))
+    train = f1.read()
+    
+    f2 = open(os.path.join(dataset_root_path, "test.jsonl"))
+    test = f2.read()
+
+    train += test
+    
+    with open(os.path.join(dataset_root_path, "unsplitted.jsonl"), 'w') as f:
+        f.write(train)
+    
+    f1.close()
+    f2.close()
 
 if __name__ == "__main__":
     # Path to the directory for MMIMDB
     format_mmimdb_dataset(sys.argv[1])
+    create_unsplitted_file(sys.argv[1])
