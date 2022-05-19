@@ -1,6 +1,7 @@
 # MM-GATBT: Enriching Multimodal Representation Using Graph Attention Network 
 
-This repository contains implementation of MM-GATBT available on NACCL 2022 SRW. MM-GATBT is built upon [MMBT](https://github.com/facebookresearch/mmbt)
+- This repository contains implementation of MM-GATBT available on NACCL 2022 SRW. 
+- MM-GATBT is built upon [MMBT](https://github.com/facebookresearch/mmbt)
 
 ##  Requirements
 
@@ -39,15 +40,11 @@ git clone git@github.com:sbseo/mm-gatbt.git
 
 2. Preprocess dataset (Kiela, 2019)
 
-> Run following script to preprocess dataset 
-
     python3 format_mmimdb_dataset.py ../
 
 3. Construct graph
 
-   ```
    python3 format_mmimdb_as_graph.py ../ medium
-   ```
 
 
 ## Train model
@@ -58,14 +55,15 @@ Pre-saved EfficientNet embedding is available to reduce image loading time. If y
 
 1. Train image-based GAT
 
-> Training GAT will output `eff_gat_256.pth` and its prediction results under dir `./eff_gat_256/`
+> Training GAT will save its best model `eff_gat_256.pth` and its prediction results under dir `./eff_gat_256/`
 
     python3 mmgatbt/gnn_train.py --img_enc eff --model gat --name eff_gat_256 --load_imgembed ./eff_embedding.pt
 
 
+
 2. Train MM-GATBT
 
-> Training MM-GATBT will output its prediction results under dir `./mmgatbt_eff256/`
+> Training MM-GATBT will save its prediction results under dir `./mmgatbt_eff256/`
 
     python3 mmgatbt/train.py --img_enc eff --model mmgatbt --name mmgatbt_eff256 --gnn_load ./eff_gat_256/eff_gat_256.pth --batch_sz 12
 
@@ -84,7 +82,7 @@ Set max_epochs to `0` for validation
 
 > Predicted results can be also found under `./mmgatbt_eff256/`
 
-   python3 mmgatbt/train.py --img_enc eff --model mmgatbt --name mmgatbt_eff256 --gnn_load ./eff_gat_256/eff_gat_256.pth --batch_sz 12 --max_epochs 0 
+    python3 mmgatbt/train.py --img_enc eff --model mmgatbt --name mmgatbt_eff256 --gnn_load ./eff_gat_256/eff_gat_256.pth --batch_sz 12 --max_epochs 0 
 
 
 ## Citation
