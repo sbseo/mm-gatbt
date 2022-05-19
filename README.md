@@ -40,12 +40,13 @@ git clone git@github.com:sbseo/mm-gatbt.git
 
 2. Preprocess dataset (Kiela, 2019)
 
-    python3 format_mmimdb_dataset.py ../
-
+```
+python3 format_mmimdb_dataset.py ../
+```
 3. Construct graph
-
-   python3 format_mmimdb_as_graph.py ../ medium
-
+```
+python3 format_mmimdb_as_graph.py ../ medium
+```
 
 ## Train model
 
