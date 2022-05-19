@@ -8,10 +8,10 @@ import torch
 import torch.nn.functional as F
 from transformers import BertTokenizer
 
-from data.graph_datasets import MovieDataset, MovieDataset_dev
+from data.graph_datasets import MovieDataset
 from data.helpers import get_glove_words, get_labels_and_frequencies
 from data.vocab import Vocab
-from gcn_train import train
+from utils.gnn_utils import train
 from models.gat import GAT
 from models.gcn import GCN
 from models.graphsage import GraphSAGE
@@ -20,11 +20,11 @@ from models.graphsage import GraphSAGE
 def get_args(parser):
     parser.add_argument("--batch_sz", type=int, default=128)
     parser.add_argument("--txt_enc", type=str, default="glove", choices=["glove", "bert"])
-    parser.add_argument("--img_enc", type=str, default="none", choices=["res", "eff", "eff6", "resnet152", "none"])
+    parser.add_argument("--img_enc", type=str, default="eff", choices=["mobile", "eff", "eff6", "resnet152", "none"])
     parser.add_argument("--bert_model", type=str, default="bert-base-uncased", choices=["prajjwal1/bert-tiny","bert-base-uncased", "bert-large-uncased"])
-    parser.add_argument("--data_path", type=str, default="../dataset/")
-    parser.add_argument("--imdir_path", type=str, default="../dataset/mmimdb/dataset")
-    parser.add_argument("--graph_path", type=str, default="../dataset/mmimdb/")
+    parser.add_argument("--data_path", type=str, default="./")
+    parser.add_argument("--imdir_path", type=str, default="./mmimdb/dataset")
+    parser.add_argument("--graph_path", type=str, default="./")
     parser.add_argument("--drop_img_percent", type=float, default=0.0)
     parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--embed_sz", type=int, default=300)
@@ -50,11 +50,11 @@ def get_args(parser):
     parser.add_argument("--savedir", type=str, default="./checkpoint/",
                         help="/path/to/save_dir/")                    
     parser.add_argument("--seed", type=int, default=123)
-    parser.add_argument("--task", type=str, default="mmimdb", choices=["mmimdb", "vsnli", "food101"])
-    parser.add_argument("--task_type", type=str, default="multilabel", choices=["multilabel", "classification"])
+    parser.add_argument("--task", type=str, default="mmimdb", choices=["mmimdb"])
+    parser.add_argument("--task_type", type=str, default="multilabel", choices=["multilabel"])
     parser.add_argument("--warmup", type=float, default=0.1)
     parser.add_argument("--weight_classes", type=int, default=1)
-    parser.add_argument("--epoch", type=int, default=80000)
+    parser.add_argument("--epoch", type=int, default=20000)
     parser.add_argument("--threshold", type=float, default=0.25)
     parser.add_argument("--scheduler", type=bool, default=False)
     parser.add_argument("--aggregator", type=str, default="gcn",
@@ -62,20 +62,17 @@ def get_args(parser):
     parser.add_argument("--gat_attn_drop", type=float, default="0.1")                    
     parser.add_argument("--gat_feat_drop", type=float, default="0.1")                    
     parser.add_argument("--gat_slope", type=float, default="0.1")                    
-    parser.add_argument("--save_model", type=bool, default=False)                    
+    parser.add_argument("--save_model", type=bool, default=True)                    
     parser.add_argument("--activation", type=str, default="elu", choices=["none", "relu", "elu"])
 
-    # dev
-    parser.add_argument("--dev", type=bool, default=False)            
     parser.add_argument("--img_infeat", type=int, default=1000)            
-    parser.add_argument("--load_imgembed", type=int, default=1)            
+    parser.add_argument("--load_imgembed", type=str, default="")            
 
     # GAT
     parser.add_argument("--num_heads", type=int, default=8)                    
-    parser.add_argument("--num_hidden", type=int, default=16)                    
+    parser.add_argument("--num_hidden", type=int, default=32)                    
     parser.add_argument("--num_layers", type=int, default=3)           
     parser.add_argument("--num_output_heads", type=int, default=3)
-
 
     # weight
     parser.add_argument("--weight", type=int, default=0)
@@ -87,7 +84,8 @@ if __name__=="__main__":
     assert remaining_args == [], remaining_args
     
     if args.save_model:
-        logger = open(os.path.join(f"{args.name}.txt"), "a+")
+        os.makedirs(f"{args.name}/")
+        logger = open(os.path.join(args.name, f"{args.name}.txt"), "a+")
         logger.write(f"{args} \n")
     print(args)
     
@@ -107,13 +105,11 @@ if __name__=="__main__":
 
 
     args.labels, args.label_freqs = get_labels_and_frequencies(
-        os.path.join(args.data_path, args.task, "train.jsonl")
+        os.path.join(args.data_path, "train.jsonl")
     )
     args.n_classes = len(args.labels)
-    if args.dev:
-        dataset = MovieDataset_dev(args)
-    else:
-        dataset = MovieDataset(args)
+
+    dataset = MovieDataset(args)
     graph = dataset[0].to('cuda')
     if args.save_model:
         logger.write(f"{graph} \n")

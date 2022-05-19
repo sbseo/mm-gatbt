@@ -10,13 +10,10 @@
 import torch
 import torch.nn as nn
 from pytorch_pretrained_bert.modeling import BertModel
-from scipy.ndimage import gaussian_filter, laplace
 
-from models.graphsage import SageEncoder
 from models.image import ImageEncoder
 
 
-# takes txt_embedding as argument
 class ImageBertEmbeddings(nn.Module):
     def __init__(self, args, embeddings):
         super(ImageBertEmbeddings, self).__init__()
@@ -50,32 +47,26 @@ class ImageBertEmbeddings(nn.Module):
         position_ids = position_ids.unsqueeze(0).expand(bsz, seq_length)
         position_embeddings = self.position_embeddings(position_ids)
         token_type_embeddings = self.token_type_embeddings(token_type_ids)
-        
-        if self.args.pos:
-            embeddings = token_embeddings + position_embeddings + token_type_embeddings
-        else:
-            embeddings = token_embeddings + token_type_embeddings
+        embeddings = token_embeddings + position_embeddings + token_type_embeddings
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
         return embeddings
 
 
-class MultimodalGCNBertEncoder(nn.Module):
+class MultimodalBertEncoder(nn.Module):
     def __init__(self, args):
-        super(MultimodalGCNBertEncoder, self).__init__()
+        super(MultimodalBertEncoder, self).__init__()
         self.args = args
         bert = BertModel.from_pretrained(args.bert_model)
         self.txt_embeddings = bert.embeddings
 
-        args.img_hidden_sz = args.g_hidden_sz
         self.img_embeddings = ImageBertEmbeddings(args, self.txt_embeddings)
         self.img_encoder = ImageEncoder(args)
         self.encoder = bert.encoder
         self.pooler = bert.pooler
+        self.clf = nn.Linear(args.hidden_sz, args.n_classes)
 
-        self.genc = SageEncoder(args)
-
-    def forward(self, input_txt, attention_mask, segment, input_img, nid):
+    def forward(self, input_txt, attention_mask, segment, input_img):
         bsz = input_txt.size(0)
         attention_mask = torch.cat(
             [
@@ -84,7 +75,13 @@ class MultimodalGCNBertEncoder(nn.Module):
             ],
             dim=1,
         )
+        print(attention_mask)
+        print(attention_mask.shape)
         extended_attention_mask = attention_mask.unsqueeze(1).unsqueeze(2)
+        print(extended_attention_mask)
+        print(extended_attention_mask.shape)
+        
+        
         extended_attention_mask = extended_attention_mask.to(
             dtype=next(self.parameters()).dtype
         )
@@ -95,28 +92,12 @@ class MultimodalGCNBertEncoder(nn.Module):
             .fill_(0)
             .cuda()
         )
-        # img = self.img_encoder(input_img)  # BxNx3x224x224 -> BxNx2048
-        # img_embed_out = self.img_embeddings(img, img_tok)
-        # txt_embed_out = self.txt_embeddings(input_txt, segment)
-        # encoder_input = torch.cat([img_embed_out, txt_embed_out], 1)  # Bx(TEXT+IMG)xHID
-
-        # [8,200] -> [8, 3, 576]
-        gembed = self.genc(nid).cuda()
-        if self.args.num_image_embeds==1:
-            glist = [gembed] * self.args.num_image_embeds
-        # experimental function !!!
-        elif self.args.num_image_embeds==3:
-            gembed_laplace = laplace(gembed.cpu().detach().numpy())
-            gembed_gaussian = gaussian_filter(gembed.cpu().detach().numpy(), sigma=1)
-            glist = [gembed, torch.tensor(gembed_gaussian).cuda(), torch.tensor(gembed_laplace).cuda()]
-
-        gembed = torch.stack(glist)
-        gembed = gembed.permute(1,0,2)
-
-        img_embed_out = self.img_embeddings(gembed, img_tok)
+        img = self.img_encoder(input_img)  # BxNx3x224x224 -> BxNx2048
+        img_embed_out = self.img_embeddings(img, img_tok)
         txt_embed_out = self.txt_embeddings(input_txt, segment)
         encoder_input = torch.cat([img_embed_out, txt_embed_out], 1)  # Bx(TEXT+IMG)xHID
-        
+        # encoder_input, _ = self.lstm(encoder_input)
+
         encoded_layers = self.encoder(
             encoder_input, extended_attention_mask, output_all_encoded_layers=False
         )
@@ -124,20 +105,13 @@ class MultimodalGCNBertEncoder(nn.Module):
         return self.pooler(encoded_layers[-1])
 
 
-class MultimodalSageBert2Clf(nn.Module):
+class MultimodalBertClf(nn.Module):
     def __init__(self, args):
-        super(MultimodalSageBert2Clf, self).__init__()
+        super(MultimodalBertClf, self).__init__()
         self.args = args
-        self.enc = MultimodalGCNBertEncoder(args)
-        # g_hidden_sz = 200
-        # args.img_hidden_sz = g_hidden_sz
-        # self.genc = SageEncoder(args)
-        last_size = args.hidden_sz #+ g_hidden_sz
-        self.clf = nn.Linear(last_size, args.n_classes)
+        self.enc = MultimodalBertEncoder(args)
+        self.clf = nn.Linear(args.hidden_sz, args.n_classes)
 
-    def forward(self, txt, mask, segment, img, nid):
-        mmbt = self.enc(txt, mask, segment, img, nid)
-        # sage = self.genc(nid).cuda()
-        # out = torch.cat([mmbt, sage], -1)
-        return self.clf(mmbt)
-        # return self.clf(out)
+    def forward(self, txt, mask, segment, img):
+        x = self.enc(txt, mask, segment, img)
+        return self.clf(x)

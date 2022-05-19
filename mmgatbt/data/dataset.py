@@ -15,19 +15,18 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset
 
-from utils.utils import truncate_seq_pair, numpy_seed
+from utils.utils import numpy_seed
 
 
 class JsonlDataset(Dataset):
     def __init__(self, data_path, tokenizer, transforms, vocab, args):
         self.data = [json.loads(l) for l in open(data_path)]
-        # self.data_dir = os.path.dirname(data_path)
-        self.data_dir = "../dataset"
         self.tokenizer = tokenizer
         self.args = args
         self.vocab = vocab
         self.n_classes = len(args.labels)
-        if args.model in ["mmbt", "mmsagebt", "mmsagebt2","mmgatbt","mmgatbt2"]:
+        self.data_path = self.args.data_path
+        if args.model in ["mmbt", "mmsagebt", "mmgatbt"]:
             self.text_start_token = ["[SEP]"]
         else:
             self.text_start_token = ["[CLS]"]  
@@ -38,7 +37,7 @@ class JsonlDataset(Dataset):
                     row["img"] = None
 
         self.max_seq_len = args.max_seq_len
-        if args.model in ["mmbt", "mmsagebt", "mmsagebt2","mmgatbt","mmgatbt2"]:
+        if args.model in ["mmbt", "mmsagebt", "mmgatbt"]:
             self.max_seq_len -= args.num_image_embeds
 
         self.transforms = transforms
@@ -47,22 +46,13 @@ class JsonlDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, index):
-        if self.args.task == "vsnli":
-            sent1 = self.tokenizer(self.data[index]["sentence1"])
-            sent2 = self.tokenizer(self.data[index]["sentence2"])
-            truncate_seq_pair(sent1, sent2, self.args.max_seq_len - 3)
-            sentence = self.text_start_token + sent1 + ["[SEP]"] + sent2 + ["[SEP]"]
-            segment = torch.cat(
-                [torch.zeros(2 + len(sent1)), torch.ones(len(sent2) + 1)]
-            )
-        else:
-            sentence = (
-                self.text_start_token
-                + self.tokenizer(self.data[index]["text"])[
-                    : (self.args.max_seq_len - 1)
-                ]
-            )
-            segment = torch.zeros(len(sentence))
+        sentence = (
+            self.text_start_token
+            + self.tokenizer(self.data[index]["text"])[
+                : (self.args.max_seq_len - 1)
+            ]
+        )
+        segment = torch.zeros(len(sentence))
 
         sentence = torch.LongTensor(
             [
@@ -82,10 +72,11 @@ class JsonlDataset(Dataset):
             )
 
         image = None
-        if self.args.model in ["img", "concatbow", "concatbert", "mmbt", "mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+        if self.args.model in ["img", "concatbow", "concatbert", "mmbt", "mmsagebt", "mmgatbt"]:
             if self.data[index]["image"]:
+                im_name = self.data[index]["image"].split("/")[-1]
                 image = Image.open(
-                    os.path.join(self.data_dir, self.data[index]["image"])
+                    os.path.join(self.args.imdir_path, im_name)
                 ).convert("RGB")
             else:
                 image = Image.fromarray(128 * np.ones((256, 256, 3), dtype=np.uint8))
@@ -98,7 +89,7 @@ class JsonlDataset(Dataset):
             # The first segment (0) is of images.
             segment += 1
 
-        if self.args.model in ["mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+        if self.args.model in ["mmsagebt", "mmgatbt"]:
             # The first SEP is part of Image Token.
             segment = segment[1:]
             sentence = sentence[1:]

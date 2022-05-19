@@ -57,7 +57,7 @@ def get_glove_words(path):
 
 def get_vocab(args):
     vocab = Vocab()
-    if args.model in ["bert", "mmbt", "concatbert", "gcn_bert", "mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+    if args.model in ["bert", "mmbt", "concatbert", "gcn_bert", "mmsagebt", "mmgatbt"]:
         bert_tokenizer = BertTokenizer.from_pretrained(
             args.bert_model, do_lower_case=True
         )
@@ -81,7 +81,7 @@ def collate_fn(batch, args):
     segment_tensor = torch.zeros(bsz, max_seq_len).long()
 
     img_tensor = None
-    if args.model in ["img", "concatbow", "concatbert", "mmbt", "gcn_bert", "mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+    if args.model in ["img", "concatbow", "concatbert", "mmbt", "gcn_bert", "mmsagebt", "mmgatbt"]:
         img_tensor = torch.stack([row[2] for row in batch])
 
     if args.task_type == "multilabel":
@@ -97,7 +97,7 @@ def collate_fn(batch, args):
         segment_tensor[i_batch, :length] = segment
         mask_tensor[i_batch, :length] = 1
 
-    if args.model in ["mmsagebt", "mmsagebt2","visualbert","mmgatbt","mmgatbt2"]:
+    if args.model in ["mmsagebt", "mmgatbt"]:
         nid_tensor = torch.stack([row[4] for row in batch])
         return text_tensor, segment_tensor, mask_tensor, img_tensor, tgt_tensor, nid_tensor
 
@@ -107,14 +107,14 @@ def collate_fn(batch, args):
 def get_data_loaders(args):
     tokenizer = (
         BertTokenizer.from_pretrained(args.bert_model, do_lower_case=True).tokenize
-        if args.model in ["bert", "mmbt", "concatbert", "gcn_bert", "mmsagebt", "mmsagebt2", "visualbert","mmgatbt","mmgatbt2"]
+        if args.model in ["bert", "mmbt", "concatbert", "gcn_bert", "mmsagebt", "mmgatbt"]
         else str.split
     )
 
     transforms = get_transforms(args)
 
     args.labels, args.label_freqs = get_labels_and_frequencies(
-        os.path.join(args.data_path, args.task, "train.jsonl")
+        os.path.join("train.jsonl")
     )
     vocab = get_vocab(args)
     args.vocab = vocab
@@ -122,7 +122,7 @@ def get_data_loaders(args):
     args.n_classes = len(args.labels)
 
     train = JsonlDataset(
-        os.path.join(args.data_path, args.task, "train.jsonl"),
+        os.path.join("train.jsonl"),
         tokenizer,
         transforms,
         vocab,
@@ -132,7 +132,7 @@ def get_data_loaders(args):
     args.train_data_len = len(train)
 
     dev = JsonlDataset(
-        os.path.join(args.data_path, args.task, "dev.jsonl"),
+        os.path.join("dev.jsonl"),
         tokenizer,
         transforms,
         vocab,
@@ -158,7 +158,7 @@ def get_data_loaders(args):
     )
 
     test_set = JsonlDataset(
-        os.path.join(args.data_path, args.task, "test.jsonl"),
+        os.path.join("test.jsonl"),
         tokenizer,
         transforms,
         vocab,
@@ -173,45 +173,8 @@ def get_data_loaders(args):
         collate_fn=collate,
     )
 
-    if args.task == "vsnli":
-        test_hard = JsonlDataset(
-            os.path.join(args.data_path, args.task, "test_hard.jsonl"),
-            tokenizer,
-            transforms,
-            vocab,
-            args,
-        )
-
-        test_hard_loader = DataLoader(
-            test_hard,
-            batch_size=args.batch_sz,
-            shuffle=False,
-            num_workers=args.n_workers,
-            collate_fn=collate,
-        )
-
-        test = {"test": test_loader, "test_hard": test_hard_loader}
-
-    else:
-        test_gt = JsonlDataset(
-            os.path.join(args.data_path, args.task, "test_hard_gt.jsonl"),
-            tokenizer,
-            transforms,
-            vocab,
-            args,
-        )
-
-        test_gt_loader = DataLoader(
-            test_gt,
-            batch_size=args.batch_sz,
-            shuffle=False,
-            num_workers=args.n_workers,
-            collate_fn=collate,
-        )
-
-        test = {
-            "test": test_loader,
-            "test_gt": test_gt_loader,
-        }
+    test = {
+        "test": test_loader,
+    }
 
     return train_loader, val_loader, test

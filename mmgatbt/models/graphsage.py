@@ -104,7 +104,6 @@ class SageEncoder(nn.Module):
 
     def forward(self, ids):
         h = self.sage(self.graph, self.features)
-        # print(ids)
         out =list()
         for id in ids:
             if self.id2node.get(id.item(), -1) != -1:
@@ -113,8 +112,6 @@ class SageEncoder(nn.Module):
             else:
                 out.append(torch.zeros(1, self.args.img_hidden_sz))
         out = torch.stack(out)
-        # print(h.shape)
-        # return torch.ones(1,100)
         return out
 
     def preprocess(self, dic):
@@ -124,10 +121,3 @@ class SageEncoder(nn.Module):
                 continue
             dic2[k] = dic[k]
         return dic2
-
-# model = torch.load("sage_vico.pth")
-
-# print(model)
-# # self.enc = torch.load(args.graph_model)
-# self.enc = list(self.enc.children())[:-1]
-# model = torch.nn.Sequential(*self.enc)

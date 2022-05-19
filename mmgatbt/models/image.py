@@ -17,8 +17,7 @@ class ImageEncoder(nn.Module):
         super(ImageEncoder, self).__init__()
         self.args = args
 
-        # this is typo. res should be changed to mobile.
-        if self.args.img_enc == 'res':
+        if self.args.img_enc == 'mobile':
             model = torchvision.models.mobilenet_v3_small(pretrained=True)
         elif self.args.img_enc == 'eff':
             model = torchvision.models.efficientnet_b4(pretrained=True)

@@ -1,66 +1,89 @@
-# MultiModal BiTransformers (MMBT)
+# MM-GATBT: Enriching Multimodal Representation Using Graph Attention Network 
 
-## Introduction
+- This repository contains implementation of MM-GATBT available on NACCL 2022 SRW. 
+- MM-GATBT is built upon [MMBT](https://github.com/facebookresearch/mmbt)
 
-[MMBT](https://arxiv.org/abs/1909.02950) is the accompanying code repository for the paper titled, "Supervised Multimodal Bitransformers for Classifying Images and Text" by Douwe Kiela, Suvrat Bhooshan, Hamed Firooz, Ethan Perez and Davide Testuggine.
- 
+##  Requirements
 
-The goal of the repository is to provide an implementation of the MMBT model and replicate the experiments in the paper.
+1. Software requirement
 
-Paper Link: https://arxiv.org/abs/1909.02950 
+``` 
+pip install -r requirements.txt
+```
 
- ## Getting Started
+2. Hardware requirement (Optional)
 
-### Setup Enviroment
+   - GPU: Nvidia 3090 (vRAM: 24 gb)
+   - Driver Version: 470.103.01
 
+## Installation 
 
-* [PyTorch](http://pytorch.org/) version >= 1.0.0
-* Python version >= 3.6
-* ``` pip install torch torchvision sklearn pytorch-pretrained-bert numpy tqdm matplotlib```
-
-
-### Model Training
-
-train.py provides the common training pipeline for all datasets. 
-- **task**: mmimdb, food101, vsnli
-- **model**: bow, img, concatbow, bert, concatbert, mmbt
-
-The following paths need to be set to start training.
-
-- **data_path**: Assumes a subfolder for each dataset. 
-- **savedir**: Location to save model checkpoints.
-- **glove_path**: Path to glove embeds file. Needed for bow, concatbow models.
-
-Example command:
+> Clone the program into your local directory 
 
 ```
-python mmbt/train.py --batch_sz 4 --gradient_accumulation_steps 40 \
- --savedir /path/to/savedir/ --name mmbt_model_run \
- --data_path /path/to/datasets/ \
- --task food101 --task_type classification \
- --model mmbt --num_image_embeds 3 --freeze_txt 5 --freeze_img 3  \
- --patience 5 --dropout 0.1 --lr 5e-05 --warmup 0.1 --max_epochs 100 --seed 1
-```  
+git clone git@github.com:sbseo/mm-gatbt.git
+```
 
-### MMBT in Transformers
+ 
 
-MMBT is also available in [HuggingFace Transformers](https://github.com/huggingface/transformers). See https://github.com/huggingface/transformers/tree/master/examples/research_projects/mm-imdb for an example that shows how easy it is to run MMBT in that framework.
+## MM-IMDb Dataset
 
- ## License
- 
- MMBT is licensed under Creative Commons-Non Commercial 4.0. See the LICENSE file for details.
- 
- 
+1. Download dataset (Arevalo et al., 2017)
+
+> Download the [MM-IMDB dataset](https://archive.org/download/mmimdb/mmimdb.tar.gz) (8.1G). Alternatively, use the following script to download. 
+
+    wget -O mmimdb.tar.gz https://archive.org/download/mmimdb/mmimdb.tar.gz
+
+> Decompress the file after download is complete.
+
+    tar -xf mmimdb.tar.gz
+
+2. Preprocess dataset (Kiela, 2019)
+
+```
+python3 format_mmimdb_dataset.py ../
+```
+3. Construct graph
+```
+python3 format_mmimdb_as_graph.py ../ medium
+```
+
+## Train model
+
+Pre-saved EfficientNet embedding is available to reduce image loading time. If you prefer to load EfficientNet from scratch, simply remove `load_imgembed`  argument.
+
+   - Pre-saved EfficientNet embedding: [eff_embedding.pt](https://drive.google.com/file/d/1wHsqBQfeXqGf_xEQRO7GIr7aJlkFY3bk/view?usp=sharing)
+
+1. Train image-based GAT
+
+> Training GAT will save its best model `eff_gat_256.pth` and its prediction results under dir `./eff_gat_256/`
+
+    python3 mmgatbt/gnn_train.py --img_enc eff --model gat --name eff_gat_256 --load_imgembed ./eff_embedding.pt
+
+
+
+2. Train MM-GATBT
+
+> Training MM-GATBT will save its prediction results under dir `./mmgatbt_eff256/`
+
+    python3 mmgatbt/train.py --img_enc eff --model mmgatbt --name mmgatbt_eff256 --gnn_load ./eff_gat_256/eff_gat_256.pth --batch_sz 12
+
+
+## Pre-trained Model
+
+Pre-trained models for both MM-GATBT (main model) and image-based GAT (submodel). 
+
+- Image-based GAT: [eff_gat_256.pth](https://drive.google.com/file/d/1S4ltCiWou75qKYmXnRmxU-2py0Oz6Czb/view?usp=sharing)
+- MM_GATBT: 
+
+
+## Validation 
+
+Set max_epochs to `0` for validation
+
+> Predicted results can be also found under `./mmgatbt_eff256/`
+
+    python3 mmgatbt/train.py --img_enc eff --model mmgatbt --name mmgatbt_eff256 --gnn_load ./eff_gat_256/eff_gat_256.pth --batch_sz 12 --max_epochs 0 
+
+
 ## Citation
-
-Please cite it as follows
-
-
-```
-@article{kiela2019supervised,
-  title={Supervised Multimodal Bitransformers for Classifying Images and Text},
-  author={Kiela, Douwe and Bhooshan, Suvrat and Firooz, Hamed and Testuggine, Davide},
-  journal={arXiv preprint arXiv:1909.02950},
-  year={2019}
-}
-```
