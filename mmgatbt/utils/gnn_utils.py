@@ -41,7 +41,8 @@ def train(g, model, args, logger):
             y_hat = pred.cpu().detach().numpy() > args.threshold
             train_acc = f1_score(y[train_mask.cpu()], y_hat[train_mask.cpu()], average="micro")
             test_acc = f1_score(y[test_mask.cpu()], y_hat[test_mask.cpu()], average="micro")
-            test_acc_macro = f1_score(y[test_mask.cpu()], y_hat[test_mask.cpu()], average="macro", zero_division=0)
+            test_acc_macro = f1_score(y[test_mask.cpu()][:,:-2], y_hat[test_mask.cpu()][:,:-2], average="macro", zero_division=0)
+
 
             # Save the best validation accuracy and the corresponding test accuracy.
             if best_test_acc < test_acc:

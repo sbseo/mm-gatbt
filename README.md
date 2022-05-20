@@ -74,7 +74,7 @@ Pre-saved EfficientNet embedding is available to reduce image loading time. If y
 Pre-trained models for both MM-GATBT (main model) and image-based GAT (submodel). 
 
 - Image-based GAT: [eff_gat_256.pth](https://drive.google.com/file/d/1S4ltCiWou75qKYmXnRmxU-2py0Oz6Czb/view?usp=sharing)
-- MM_GATBT: 
+- MM_GATBT: [mmgatbt_eff256](https://drive.google.com/file/d/1fECZU972DNt5vwMABhTwyK235Fbv_wui/view?usp=sharing)
 
 
 ## Validation 
@@ -83,7 +83,8 @@ Set max_epochs to `0` for validation
 
 > Predicted results can be also found under `./mmgatbt_eff256/`
 
-    python3 mmgatbt/train.py --img_enc eff --model mmgatbt --name mmgatbt_eff256 --gnn_load ./eff_gat_256/eff_gat_256.pth --batch_sz 12 --max_epochs 0 
+    python3 mmgatbt/train.py --img_enc eff --model mmgatbt --name mmgatbt_eff256 --gnn_load ./eff_gat_256.pth --batch_sz 12 --max_epochs 0 
 
 
 ## Citation
+
