@@ -143,7 +143,7 @@ def model_eval(i_epoch, data, model, args, criterion, store_preds=False):
     if args.task_type == "multilabel":
         tgts = np.vstack(tgts)
         preds = np.vstack(preds)
-        metrics["macro_f1"] = f1_score(tgts, preds, average="macro")
+        metrics["macro_f1"] = f1_score(tgts[:,:-2], preds[:,:-2], average="macro")
         metrics["micro_f1"] = f1_score(tgts, preds, average="micro")
     else:
         tgts = [l for sl in tgts for l in sl]

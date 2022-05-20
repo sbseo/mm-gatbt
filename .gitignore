@@ -12,3 +12,4 @@ mmgatbt/data/__pycache__/
 mmgatbt/models/__pycache__/
 mmgatbt/utils/__pycache__/
 mmimdb
+.gitignore
