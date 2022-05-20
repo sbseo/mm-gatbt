@@ -52,13 +52,13 @@ class MovieDataset(DGLDataset):
         edges_data = pd.read_csv(os.path.join(self.args.graph_path, 'edge_data.csv'))
 
         # create text-based node embedding
-        if self.args.txt_enc == "glove" and self.args.img_enc == 'none':
+        if self.args.txt_enc == "glove" and not self.args.img_enc:
             x = nodes_data['text'].str.split().to_list()
             x = list(map(lambda sen: ["[CLS]"] + sen, x))
             x = list(map(lambda sen: self.glove_enc(sen), x))
             node_features = torch.from_numpy(np.array(x))
             print(node_features.shape)
-        elif self.args.txt_enc == "bert" and self.args.img_enc == 'none':
+        elif self.args.txt_enc == "bert" and not self.args.img_enc:
             tokenizer = BertTokenizer.from_pretrained(self.args.bert_model)
             model = BertModel.from_pretrained(self.args.bert_model).cuda()
             best_params = torch.load("../bert_base/model_best.pt")
@@ -96,7 +96,7 @@ class MovieDataset(DGLDataset):
 
         # create image-based node embedding
         # Image.warnings.simplefilter('error', Image.DecompressionBombWarning)
-        if self.args.img_enc != 'none':
+        if self.args.img_enc:
             if self.args.img_enc == 'mobile':
                 model = torchvision.models. mobilenet_v3_small(pretrained=True)
             elif self.args.img_enc == 'eff':
