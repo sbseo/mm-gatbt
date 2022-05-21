@@ -1,6 +1,6 @@
 # MM-GATBT: Enriching Multimodal Representation Using Graph Attention Network 
 
-<img src="./fig_model.png" alt="model" style="zoom:20%;" />
+<img src="./fig_model.png" alt="model" width=750 />
 
 
 - This repository contains implementation of MM-GATBT available on NACCL 2022 SRW. 
@@ -9,7 +9,7 @@
 
 ## Installation 
 
-> Clone the repository into your local directory 
+> Clone this repository into your local directory 
 
 ```
 git clone git@github.com:sbseo/mm-gatbt.git
@@ -39,12 +39,12 @@ pip install -r requirements.txt
 
 1. Download dataset (8.1G) (Arevalo et al., 2017)
 ```
-    wget -O mmimdb.tar.gz https://archive.org/download/mmimdb/mmimdb.tar.gz
+wget -O mmimdb.tar.gz https://archive.org/download/mmimdb/mmimdb.tar.gz
 ```
 
 2. Decompress the file after download.
 ```
-    tar -xf mmimdb.tar.gz
+tar -xf mmimdb.tar.gz
 ```
 
 3. Preprocess dataset (Kiela, 2019)
@@ -89,7 +89,7 @@ gdown 1wHsqBQfeXqGf_xEQRO7GIr7aJlkFY3bk
 
 ## Pre-trained Model
 
-Pre-trained models for both MM-GATBT (main model) and image-based GAT (submodel). 
+Pre-trained models for both MM-GATBT (main model) and image-based GAT (submodel) are available. 
 
 - Image-based GAT: [eff_gat_256.pth](https://drive.google.com/file/d/1S4ltCiWou75qKYmXnRmxU-2py0Oz6Czb/view?usp=sharing)
 - MM_GATBT: [mmgatbt_eff256.zip](https://drive.google.com/file/d/12O9-kOBxk-Ggw85Vo9M5SDFcTpDPlMcE/view?usp=sharing)
