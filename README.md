@@ -1,6 +1,6 @@
 # MM-GATBT: Enriching Multimodal Representation Using Graph Attention Network 
 
-<img src="./fig_model.png" alt="model" width=600 />
+<img src="./fig_model.png" alt="model" width=750 />
 
 
 - This repository contains implementation of MM-GATBT available on NACCL 2022 SRW. 
