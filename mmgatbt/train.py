@@ -40,7 +40,7 @@ def get_args(parser):
     parser.add_argument("--img_embed_pool_type", type=str, default="avg", choices=["max", "avg"])
     parser.add_argument("--img_hidden_sz", type=int, default=256)
     parser.add_argument("--include_bn", type=int, default=True)
-    parser.add_argument("--lr", type=float, default=1e-5)
+    parser.add_argument("--lr", type=float, default=5e-5)
     parser.add_argument("--lr_factor", type=float, default=0.5)
     parser.add_argument("--lr_patience", type=int, default=2)
     parser.add_argument("--max_epochs", type=int, default=100)
