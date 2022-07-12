@@ -3,7 +3,7 @@
 <img src="./fig_model.png" alt="model" width=750 />
 
 
-- This repository contains implementation of MM-GATBT available on NACCL 2022 SRW. 
+- This repository contains implementation of MM-GATBT published at NAACL 2022 SRW. 
 - MM-GATBT is built upon [MMBT](https://github.com/facebookresearch/mmbt)
 
 
@@ -112,4 +112,19 @@ Set `max_epochs` to `0` for validation
 
 
 ## Citation
-
+```
+@inproceedings{seo-etal-2022-mm,
+    title = "{MM}-{GATBT}: Enriching Multimodal Representation Using Graph Attention Network",
+    author = "Seo, Seung Byum  and
+      Nam, Hyoungwook  and
+      Delgosha, Payam",
+    booktitle = "Proceedings of the 2022 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies: Student Research Workshop",
+    month = jul,
+    year = "2022",
+    address = "Hybrid: Seattle, Washington + Online",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.naacl-srw.14",
+    pages = "106--112",
+    abstract = "While there have been advances in Natural Language Processing (NLP), their success is mainly gained by applying a self-attention mechanism into single or multi-modalities. While this approach has brought significant improvements in multiple downstream tasks, it fails to capture the interaction between different entities. Therefore, we propose MM-GATBT, a multimodal graph representation learning model that captures not only the relational semantics within one modality but also the interactions between different modalities. Specifically, the proposed method constructs image-based node embedding which contains relational semantics of entities. Our empirical results show that MM-GATBT achieves state-of-the-art results among all published papers on the MM-IMDb dataset.",
+}
+```
